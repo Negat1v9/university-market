@@ -94,6 +94,7 @@ func (r *taskRepository) FindProj(ctx context.Context, filter bson.D, proj bson.
 }
 func (r *taskRepository) Update(ctx context.Context, filter bson.D, task *taskmodel.Task) (*taskmodel.Task, error) {
 	task.UpdatedAt = time.Now().UTC()
+	taskID := task.ID
 	if task.ID != "" {
 		task.ID = ""
 	}
@@ -113,6 +114,7 @@ func (r *taskRepository) Update(ctx context.Context, filter bson.D, task *taskmo
 	case err != nil:
 		return nil, err
 	}
+	task.ID = taskID
 
 	return &afterTask, err
 

@@ -56,6 +56,7 @@ func (r *userRepository) FindProj(ctx context.Context, filter bson.D, proj bson.
 	return &user, nil
 }
 func (r *userRepository) Edit(ctx context.Context, filter bson.D, user *usermodel.User) (*usermodel.User, error) {
+	userID := user.ID
 	if user.ID != "" {
 		user.ID = ""
 	}
@@ -73,6 +74,7 @@ func (r *userRepository) Edit(ctx context.Context, filter bson.D, user *usermode
 	case err != nil:
 		return nil, err
 	}
+	user.ID = userID
 
 	return &afterUser, nil
 }
