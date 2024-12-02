@@ -12,6 +12,7 @@ const (
 type WorkerInfo struct {
 	Ban          bool   `bson:"ban,omitempty" json:"ban,omitempty"`                     // does the worker have a ban?
 	Karma        int    `bson:"karma,omitempty" json:"karma,omitempty"`                 // seller rating
+	FullName     string `bson:"full_name,omitempty" json:"full_name,omitempty"`         // real name
 	Education    string `bson:"education,omitempty" json:"education,omitempty"`         //level of education worker
 	Experience   string `bson:"experience,omitempty" json:"experience,omitempty"`       // experience
 	StarsBalance int    `bson:"stars_balance,omitempty" json:"stars_balance,omitempty"` // balance of telegram stars
@@ -26,7 +27,6 @@ type User struct {
 	ID           string                `bson:"_id,omitempty" json:"id"`
 	TelegramID   int64                 `bson:"telegram_id,omitempty" json:"-"`                       // unique identifier from telegram
 	Username     string                `bson:"username,omitempty" json:"username,omitempty"`         // nickname name from telegram
-	FullName     string                `bson:"full_name,omitempty" json:"full_name,omitempty"`       // real name
 	PhoneNumber  string                `bson:"phone_number,omitempty" json:"phone_number,omitempty"` // phone number
 	ReferralID   int64                 `bson:"referral_id,omitempty" json:"referral_id,omitempty"`   // ID of the user who invited him
 	Notification *NotificationSettings `bson:"notification,omitempty" json:"notification,omitempty"`
@@ -40,21 +40,21 @@ func NewUser(tgId int64, username, fullname string, referall int64) *User {
 	return &User{
 		TelegramID: tgId,
 		Username:   username,
-		FullName:   fullname,
 		ReferralID: referall,
 		Notification: &NotificationSettings{
 			SendSilent: false,
 		},
 		Role:       RegularUser,
-		WorkerInfo: NewWorkerInfo(0),
+		WorkerInfo: NewWorkerInfo(0, fullname),
 		CreatedAt:  time.Now().UTC(),
 	}
 }
 
-func NewWorkerInfo(starsBalance int) *WorkerInfo {
+func NewWorkerInfo(starsBalance int, fullName string) *WorkerInfo {
 	return &WorkerInfo{
 		Ban:          false,
 		Karma:        0,
+		FullName:     fullName,
 		StarsBalance: starsBalance,
 		Description:  "",
 	}
@@ -81,8 +81,10 @@ type LoginRes struct {
 
 type WorkerInfoWithTaskRes struct {
 	ID          string `json:"id"`
-	UserName    string `json:"username"`
+	FullName    string `json:"full_name"`
 	Karma       int    `json:"karma"`
+	Education   string `json:"education,omitempty"`
+	Experience  string `json:"experience,omitempty"`
 	Description string `json:"description"`
 }
 

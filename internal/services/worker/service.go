@@ -34,7 +34,7 @@ func NewServiceWorker(log *slog.Logger, tgClient tgbot.WebTgClient, store storag
 
 func (s *WorkerServiceImpl) Create(ctx context.Context, userID string, data *usermodel.WorkerCreate) (*usermodel.User, error) {
 	filter := filters.NewCmplxFilter().Add(filters.UserByID(userID))
-	user, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.AuthWorker)
+	user, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.WorkerPublic)
 	switch {
 	case err == mongoStore.ErrNoUser:
 		return nil, httpresponse.NewError(404, err.Error())
@@ -45,11 +45,15 @@ func (s *WorkerServiceImpl) Create(ctx context.Context, userID string, data *use
 		return nil, httpresponse.NewError(409, "alredy exist")
 
 	}
+	fullName := ""
+	if user.WorkerInfo != nil {
+		fullName = user.WorkerInfo.FullName
+	}
 
 	upd := usermodel.User{
 		PhoneNumber: data.PhoneNumber,
 		Role:        usermodel.Worker,
-		WorkerInfo:  usermodel.NewWorkerInfo(0), // TODO: start star balance ?
+		WorkerInfo:  usermodel.NewWorkerInfo(0, fullName), // TODO: start star balance ?
 		UpdatedAt:   time.Now(),
 	}
 
@@ -94,8 +98,10 @@ func (s *WorkerServiceImpl) WorkerPublicInfo(ctx context.Context, workerID strin
 
 	return &usermodel.WorkerInfoWithTaskRes{
 		ID:          workerID,
-		UserName:    worker.Username,
 		Karma:       worker.WorkerInfo.Karma,
+		FullName:    worker.WorkerInfo.FullName,
+		Education:   worker.WorkerInfo.Education,
+		Experience:  worker.WorkerInfo.Experience,
 		Description: worker.WorkerInfo.Description,
 	}, nil
 }

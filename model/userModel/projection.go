@@ -21,8 +21,10 @@ var (
 	}
 	WorkerPublic = bson.M{
 		"_id":                     1,
-		"username":                1,
 		"worker_info.karma":       1,
+		"worker_info.full_name":   1,
+		"worker_info.education":   1,
+		"worker_info.experience":  1,
 		"worker_info.description": 1,
 		"role":                    1,
 	}
