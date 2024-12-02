@@ -1,7 +1,12 @@
 package app
 
 import (
+	"context"
 	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/Negat1v9/work-marketplace/internal/config"
 	"github.com/Negat1v9/work-marketplace/internal/services"
@@ -37,6 +42,30 @@ func (a *App) RunApp() error {
 	a.log.Info("start bot")
 
 	a.log.Info("start server")
-	return server.Run()
 
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		if err := server.Run(); err != nil {
+			a.log.Error("app is down", slog.String("err", err.Error()))
+		}
+	}()
+
+	<-sigs
+	now := time.Now().UTC()
+	a.log.Info("get signal stop app", slog.String("time UTC", now.Format(time.DateTime)))
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	if err := server.Stop(ctx); err != nil {
+		a.log.Error("server shotdown", slog.String("err", err.Error()))
+	}
+
+	<-ctx.Done()
+
+	a.log.Info("stop app", slog.Duration("shotdown time", time.Duration(time.Now().UTC().Sub(now).Seconds())))
+
+	return nil
 }

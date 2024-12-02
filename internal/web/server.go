@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 
@@ -38,4 +39,8 @@ func (s *Server) Run() error {
 	s.log.Info("start listen...")
 
 	return s.Server.ListenAndServe()
+}
+
+func (s *Server) Stop(ctx context.Context) error {
+	return s.Server.Shutdown(ctx)
 }
