@@ -1,6 +1,10 @@
 package usermodel
 
-import "time"
+import (
+	"time"
+
+	commentmodel "github.com/Negat1v9/work-marketplace/model/comment"
+)
 
 type UserType string
 
@@ -11,7 +15,6 @@ const (
 
 type WorkerInfo struct {
 	Ban          bool   `bson:"ban,omitempty" json:"ban,omitempty"`                     // does the worker have a ban?
-	Karma        int    `bson:"karma,omitempty" json:"karma,omitempty"`                 // seller rating
 	FullName     string `bson:"full_name,omitempty" json:"full_name,omitempty"`         // real name
 	Education    string `bson:"education,omitempty" json:"education,omitempty"`         //level of education worker
 	Experience   string `bson:"experience,omitempty" json:"experience,omitempty"`       // experience
@@ -53,7 +56,6 @@ func NewUser(tgId int64, username, fullname string, referall int64) *User {
 func NewWorkerInfo(starsBalance int, fullName string) *WorkerInfo {
 	return &WorkerInfo{
 		Ban:          false,
-		Karma:        0,
 		FullName:     fullName,
 		StarsBalance: starsBalance,
 		Description:  "",
@@ -80,12 +82,12 @@ type LoginRes struct {
 }
 
 type WorkerInfoWithTaskRes struct {
-	ID          string `json:"id"`
-	FullName    string `json:"full_name"`
-	Karma       int    `json:"karma"`
-	Education   string `json:"education,omitempty"`
-	Experience  string `json:"experience,omitempty"`
-	Description string `json:"description"`
+	ID          string                               `json:"id"`
+	FullName    string                               `json:"full_name"`
+	Rating      *commentmodel.CountLikeDislikeWorker `json:"rating"`
+	Education   string                               `json:"education,omitempty"`
+	Experience  string                               `json:"experience,omitempty"`
+	Description string                               `json:"description"`
 }
 
 type IsWorkerRes struct {

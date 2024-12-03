@@ -53,6 +53,7 @@ type RespondRepository interface {
 type CommentRepository interface {
 	Create(context.Context, *commentmodel.Comment) (string, error)
 	FindMany(ctx context.Context, filter bson.D, limit, skip int64) ([]commentmodel.Comment, error)
+	CountWorkerLikesDislikes(ctx context.Context, workerID string) (*commentmodel.CountLikeDislikeWorker, error)
 	Update(context.Context, bson.D, *commentmodel.Comment) error
 	Delete(context.Context, bson.D) error
 }

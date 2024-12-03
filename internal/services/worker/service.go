@@ -96,10 +96,15 @@ func (s *WorkerServiceImpl) WorkerPublicInfo(ctx context.Context, workerID strin
 		return nil, httpresponse.ServerError()
 	}
 
+	rating, err := s.store.Comment().CountWorkerLikesDislikes(ctx, workerID)
+	if err != nil {
+		s.log.Error("worker public info", slog.String("err", err.Error()))
+	}
+
 	return &usermodel.WorkerInfoWithTaskRes{
 		ID:          workerID,
-		Karma:       worker.WorkerInfo.Karma,
 		FullName:    worker.WorkerInfo.FullName,
+		Rating:      rating,
 		Education:   worker.WorkerInfo.Education,
 		Experience:  worker.WorkerInfo.Experience,
 		Description: worker.WorkerInfo.Description,

@@ -56,6 +56,42 @@ func (r *commentRepository) FindMany(ctx context.Context, filter bson.D, limit, 
 	return comments, err
 }
 
+func (r *commentRepository) CountWorkerLikesDislikes(ctx context.Context, workerID string) (*commentmodel.CountLikeDislikeWorker, error) {
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{{Key: "worker_id", Value: workerID}}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$is_like"},
+			{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
+		}}},
+	}
+	cur, err := r.c.Aggregate(ctx, pipeline)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer cur.Close(ctx)
+
+	result := commentmodel.CountLikeDislikeWorker{}
+	for cur.Next(ctx) {
+		var tempResult struct {
+			ID    bool `bson:"_id"`
+			Count int  `bson:"count"`
+		}
+		if err := cur.Decode(&tempResult); err != nil {
+			return nil, err
+		}
+		switch tempResult.ID {
+		case true:
+			result.Likes = tempResult.Count
+		case false:
+			result.Dislike = tempResult.Count
+		}
+	}
+
+	return &result, nil
+}
+
 func (r *commentRepository) Update(ctx context.Context, filter bson.D, upd *commentmodel.Comment) error {
 	commentID := upd.ID
 	if upd.ID != "" {

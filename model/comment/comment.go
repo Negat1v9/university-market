@@ -23,6 +23,11 @@ type Comment struct {
 	UpdatedAt time.Time `bson:"updated_at,omitempty" json:"updated_at"`
 }
 
+type CountLikeDislikeWorker struct {
+	Likes   int `json:"likes"`
+	Dislike int `json:"dislikes"`
+}
+
 type CommentCreateRes struct {
 	CommentID string `json:"comment_id"`
 }
