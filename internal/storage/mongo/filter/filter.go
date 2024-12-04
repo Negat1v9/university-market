@@ -11,12 +11,6 @@ type CmplxFilters struct {
 	filters bson.D
 }
 
-func NewCmplxFilter() *CmplxFilters {
-	return &CmplxFilters{
-		filters: make(primitive.D, 0),
-	}
-}
-
 // refactored
 func New() *CmplxFilters {
 	return &CmplxFilters{

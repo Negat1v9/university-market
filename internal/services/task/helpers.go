@@ -11,9 +11,6 @@ import (
 
 func FindFilterTasks(v url.Values) *filters.CmplxFilters {
 	f := filters.New()
-	if filt := v.Get("status"); filt != "" {
-		f.Add(filters.TaskByStatus(taskmodel.TaskStatus(filt)))
-	}
 	tags := []string{}
 	if filt := v.Get("form_education"); filt != "" {
 		tags = append(tags, filt)
@@ -29,6 +26,10 @@ func FindFilterTasks(v url.Values) *filters.CmplxFilters {
 	}
 	if len(tags) != 0 {
 		f.Add(filters.TaskByTags(tags))
+	}
+	// first selection by tags then status for indexes mongodb
+	if filt := v.Get("status"); filt != "" {
+		f.Add(filters.TaskByStatus(taskmodel.TaskStatus(filt)))
 	}
 	return f
 }

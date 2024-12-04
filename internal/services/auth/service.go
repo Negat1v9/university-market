@@ -33,8 +33,10 @@ func (s *AuthServiceImpl) Login(ctx context.Context, initData string) (string, e
 		return "", httpresponse.NewError(401, "forbiden")
 	}
 
-	filter := filters.NewCmplxFilter().Add(filters.UserByTgID(data.User.ID))
-	user, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.OnlyID)
+	user, err := s.store.User().FindProj(
+		ctx,
+		filters.New().Add(filters.UserByTgID(data.User.ID)).Filters(),
+		usermodel.OnlyID)
 	switch {
 	case err == mongoStore.ErrNoUser:
 		return "", httpresponse.NewError(401, "forbiden")

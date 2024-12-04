@@ -75,9 +75,9 @@ func (s *TaskServiceImpl) Create(ctx context.Context, userID string, meta *taskm
 
 // Info: FindOne - finding a task by its ID, returns all information about the task
 func (s *TaskServiceImpl) FindOne(ctx context.Context, userID, taskID string) (*taskmodel.InfoTaskRes, error) {
-	filter := filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID))
-
-	task, err := s.store.Task().Find(ctx, filter.Filters())
+	task, err := s.store.Task().Find(
+		ctx,
+		filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID)).Filters())
 	switch {
 	case err == mongoStore.ErrNoTask:
 		return nil, httpresponse.NewError(404, err.Error())
@@ -92,9 +92,10 @@ func (s *TaskServiceImpl) FindOne(ctx context.Context, userID, taskID string) (*
 // Info: UpdateTaskMeta - updating the meta field of a task, returns the updated fields
 // only the user who created the task can change it
 func (s *TaskServiceImpl) UpdateTaskMeta(ctx context.Context, taskID, userID string, data *taskmodel.UpdateTaskMeta) (*taskmodel.Task, error) {
-	filter := filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID))
-
-	task, err := s.store.Task().FindProj(ctx, filter.Filters(), taskmodel.OnlyMeta)
+	task, err := s.store.Task().FindProj(
+		ctx,
+		filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID)).Filters(),
+		taskmodel.OnlyMeta)
 	switch {
 	case err == mongoStore.ErrNoTask:
 		return nil, httpresponse.NewError(404, err.Error())
@@ -116,8 +117,10 @@ func (s *TaskServiceImpl) UpdateTaskMeta(ctx context.Context, taskID, userID str
 		UpdatedAt: time.Now().UTC(),
 	}
 
-	filter = filters.New().Add(filters.TaskByID(taskID))
-	afterTask, err := s.store.Task().Update(ctx, filter.Filters(), &upd)
+	afterTask, err := s.store.Task().Update(
+		ctx,
+		filters.New().Add(filters.TaskByID(taskID)).Filters(),
+		&upd)
 	if err != nil {
 		s.log.Debug("update task", slog.String("err", err.Error()))
 		return nil, httpresponse.ServerError()
@@ -154,8 +157,10 @@ func (s *TaskServiceImpl) FindUserTasks(ctx context.Context, userID string, v ur
 }
 
 func (s *TaskServiceImpl) SelectWorker(ctx context.Context, taskID, userID, workerID string) error {
-	filter := filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID))
-	task, err := s.store.Task().FindProj(ctx, filter.Filters(), taskmodel.ProjOnRespond)
+	task, err := s.store.Task().FindProj(
+		ctx,
+		filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID)).Filters(),
+		taskmodel.ProjOnRespond)
 	switch {
 	case err == mongoStore.ErrNoUser:
 		return httpresponse.NewError(404, err.Error())
@@ -169,8 +174,10 @@ func (s *TaskServiceImpl) SelectWorker(ctx context.Context, taskID, userID, work
 		return err
 	}
 
-	filter = filters.New().Add(filters.UserByID(workerID))
-	workerInfo, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.OnlyTgID)
+	workerInfo, err := s.store.User().FindProj(
+		ctx,
+		filters.New().Add(filters.UserByID(workerID)).Filters(),
+		usermodel.OnlyTgID)
 	switch {
 	case err == mongoStore.ErrNoUser:
 		return httpresponse.NewError(404, err.Error())
@@ -208,8 +215,10 @@ func (s *TaskServiceImpl) SelectWorker(ctx context.Context, taskID, userID, work
 }
 
 func (s *TaskServiceImpl) CompleteTask(ctx context.Context, taskID, userID string) (*taskmodel.InfoTaskRes, error) {
-	filter := filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID))
-	task, err := s.store.Task().FindProj(ctx, filter.Filters(), taskmodel.OnlyStatus)
+	task, err := s.store.Task().FindProj(
+		ctx,
+		filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID)).Filters(),
+		taskmodel.OnlyStatus)
 	switch {
 	case err == mongoStore.ErrNoUser:
 		return nil, httpresponse.NewError(404, err.Error())
@@ -234,8 +243,10 @@ func (s *TaskServiceImpl) CompleteTask(ctx context.Context, taskID, userID strin
 }
 
 func (s *TaskServiceImpl) DeleteTask(ctx context.Context, taskID, userID string) error {
-	filter := filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID))
-	task, err := s.store.Task().FindProj(ctx, filter.Filters(), taskmodel.OnlyStatus)
+	task, err := s.store.Task().FindProj(
+		ctx,
+		filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID)).Filters(),
+		taskmodel.OnlyStatus)
 	switch {
 	case err == mongoStore.ErrNoUser:
 		return httpresponse.NewError(404, err.Error())
@@ -246,7 +257,9 @@ func (s *TaskServiceImpl) DeleteTask(ctx context.Context, taskID, userID string)
 		return httpresponse.NewError(406, "task.status is "+string(taskmodel.Completed))
 	}
 
-	err = s.store.Task().Delete(ctx, filters.New().Add(filters.TaskByID(taskID)).Filters())
+	err = s.store.Task().Delete(
+		ctx,
+		filters.New().Add(filters.TaskByID(taskID)).Filters())
 	if err != nil {
 		s.log.Error("delete task", slog.String("err", err.Error()))
 		return err
@@ -256,8 +269,9 @@ func (s *TaskServiceImpl) DeleteTask(ctx context.Context, taskID, userID string)
 
 // AttachFiles - calls from bot attach files to task
 func (s *TaskServiceImpl) AttachFiles(ctx context.Context, taskID string, fileID string) error {
-	filter := filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByStatus(taskmodel.Pending))
-	task, err := s.store.Task().FindProj(ctx, filter.Filters(), taskmodel.ProjOnAttachFiles)
+	task, err := s.store.Task().FindProj(
+		ctx, filters.New().Add(filters.TaskByID(taskID)).Filters(),
+		taskmodel.ProjOnAttachFiles)
 
 	switch {
 	case err == mongoStore.ErrNoTask:
@@ -282,8 +296,10 @@ func (s *TaskServiceImpl) AttachFiles(ctx context.Context, taskID string, fileID
 }
 
 func (s *TaskServiceImpl) PublishTask(ctx context.Context, taskID string) error {
-	filter := filters.New().Add(filters.TaskByID(taskID))
-	task, err := s.store.Task().FindProj(ctx, filter.Filters(), taskmodel.OnlyStatus)
+	task, err := s.store.Task().FindProj(
+		ctx,
+		filters.New().Add(filters.TaskByID(taskID)).Filters(),
+		taskmodel.OnlyStatus)
 
 	switch {
 	case err == mongoStore.ErrNoTask:
@@ -299,7 +315,10 @@ func (s *TaskServiceImpl) PublishTask(ctx context.Context, taskID string) error 
 		Status: taskmodel.WaitingExecution,
 	}
 
-	_, err = s.store.Task().Update(ctx, filters.New().Add(filters.TaskByID(taskID)).Filters(), &upd)
+	_, err = s.store.Task().Update(
+		ctx,
+		filters.New().Add(filters.TaskByID(taskID)).Filters(),
+		&upd)
 	switch {
 	case err == mongoStore.ErrNoTask:
 		return httpresponse.NewError(404, err.Error())

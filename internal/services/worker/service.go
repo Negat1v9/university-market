@@ -33,8 +33,10 @@ func NewServiceWorker(log *slog.Logger, tgClient tgbot.WebTgClient, store storag
 }
 
 func (s *WorkerServiceImpl) Create(ctx context.Context, userID string, data *usermodel.WorkerCreate) (*usermodel.User, error) {
-	filter := filters.NewCmplxFilter().Add(filters.UserByID(userID))
-	user, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.WorkerPublic)
+	user, err := s.store.User().FindProj(
+		ctx,
+		filters.New().Add(filters.UserByID(userID)).Filters(),
+		usermodel.WorkerPublic)
 	switch {
 	case err == mongoStore.ErrNoUser:
 		return nil, httpresponse.NewError(404, err.Error())
@@ -57,8 +59,10 @@ func (s *WorkerServiceImpl) Create(ctx context.Context, userID string, data *use
 		UpdatedAt:   time.Now(),
 	}
 
-	filter = filters.NewCmplxFilter().Add(filters.UserByID(userID))
-	user, err = s.store.User().Edit(ctx, filter.Filters(), &upd)
+	user, err = s.store.User().Edit(
+		ctx,
+		filters.New().Add(filters.UserByID(userID)).Filters(),
+		&upd)
 	if err != nil {
 		s.log.Error("create worker", slog.String("err", err.Error()))
 		return nil, httpresponse.ServerError()
@@ -68,8 +72,10 @@ func (s *WorkerServiceImpl) Create(ctx context.Context, userID string, data *use
 }
 
 func (s *WorkerServiceImpl) IsWorker(ctx context.Context, userID string) (bool, error) {
-	filter := filters.NewCmplxFilter().Add(filters.UserByID(userID))
-	user, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.AuthWorker)
+	user, err := s.store.User().FindProj(
+		ctx,
+		filters.New().Add(filters.UserByID(userID)).Filters(),
+		usermodel.AuthWorker)
 	switch {
 	case err == mongoStore.ErrNoUser:
 		return false, httpresponse.NewError(404, err.Error())
@@ -82,7 +88,10 @@ func (s *WorkerServiceImpl) IsWorker(ctx context.Context, userID string) (bool, 
 }
 
 func (s *WorkerServiceImpl) WorkerPublicInfo(ctx context.Context, workerID string) (*usermodel.WorkerInfoWithTaskRes, error) {
-	worker, err := s.store.User().FindProj(ctx, filters.New().Add(filters.UserByID(workerID)).Filters(), usermodel.WorkerPublic)
+	worker, err := s.store.User().FindProj(
+		ctx,
+		filters.New().Add(filters.UserByID(workerID)).Filters(),
+		usermodel.WorkerPublic)
 	switch {
 	case err == mongoStore.ErrNoUser:
 		return nil, httpresponse.NewError(404, err.Error())
@@ -111,8 +120,9 @@ func (s *WorkerServiceImpl) WorkerPublicInfo(ctx context.Context, workerID strin
 	}, nil
 }
 func (s *WorkerServiceImpl) Worker(ctx context.Context, workerID string) (*usermodel.User, error) {
-	filter := filters.NewCmplxFilter().Add(filters.UserByID(workerID))
-	worker, err := s.store.User().Find(ctx, filter.Filters())
+	worker, err := s.store.User().Find(
+		ctx,
+		filters.New().Add(filters.UserByID(workerID)).Filters())
 
 	switch {
 	case err == mongoStore.ErrNoUser:
@@ -128,8 +138,9 @@ func (s *WorkerServiceImpl) Worker(ctx context.Context, workerID string) (*userm
 }
 
 func (s *WorkerServiceImpl) Update(ctx context.Context, workerID string, data *usermodel.WorkerInfo) (*usermodel.User, error) {
-	filter := filters.NewCmplxFilter().Add(filters.UserByID(workerID))
-	worker, err := s.store.User().Find(ctx, filter.Filters())
+	worker, err := s.store.User().Find(
+		ctx,
+		filters.New().Add(filters.UserByID(workerID)).Filters())
 	switch {
 	case err == mongoStore.ErrNoUser:
 		return nil, httpresponse.NewError(404, err.Error())
@@ -145,8 +156,10 @@ func (s *WorkerServiceImpl) Update(ctx context.Context, workerID string, data *u
 		UpdatedAt:  time.Now(),
 	}
 
-	filter = filters.NewCmplxFilter().Add(filters.UserByID(workerID))
-	afterWorker, err := s.store.User().Edit(ctx, filter.Filters(), &upd)
+	afterWorker, err := s.store.User().Edit(
+		ctx,
+		filters.New().Add(filters.UserByID(workerID)).Filters(),
+		&upd)
 	if err != nil {
 		s.log.Error("update worker", slog.String("err", err.Error()))
 		return nil, httpresponse.ServerError()
@@ -168,7 +181,12 @@ func (s *WorkerServiceImpl) AvailableTasks(ctx context.Context, v url.Values) ([
 		skip = 0
 	}
 
-	tasks, err := s.store.Task().FindMany(ctx, filter.Filters(), taskmodel.ManyTasks, limit, skip)
+	tasks, err := s.store.Task().FindMany(
+		ctx,
+		filter.Filters(),
+		taskmodel.ManyTasks,
+		limit,
+		skip)
 	switch {
 	case err == mongoStore.ErrNoTask:
 		return nil, httpresponse.NewError(404, err.Error())
@@ -183,10 +201,9 @@ func (s *WorkerServiceImpl) AvailableTasks(ctx context.Context, v url.Values) ([
 // Info: TaskInfo - returns all information about the task and information about the cost of
 // responding it. How much does it cost to respond for a given worker
 func (s *WorkerServiceImpl) TaskInfo(ctx context.Context, workerID string, taskID string) (*taskmodel.InfoTaskRes, error) {
-	filter := filters.NewCmplxFilter().
-		Add(filters.TaskByID(taskID))
-
-	task, err := s.store.Task().Find(ctx, filter.Filters())
+	task, err := s.store.Task().Find(
+		ctx,
+		filters.New().Add(filters.TaskByID(taskID)).Filters())
 	switch {
 	case err == mongoStore.ErrNoTask:
 		return nil, httpresponse.NewError(404, err.Error())
@@ -195,9 +212,10 @@ func (s *WorkerServiceImpl) TaskInfo(ctx context.Context, workerID string, taskI
 		return nil, httpresponse.ServerError()
 	}
 
-	filter = filters.NewCmplxFilter().Add(filters.UserByID(workerID))
-
-	workerInfo, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.ProjOnlyBalance)
+	workerInfo, err := s.store.User().FindProj(
+		ctx,
+		filters.New().Add(filters.UserByID(workerID)).Filters(),
+		usermodel.ProjOnlyBalance)
 	if err != nil {
 		s.log.Error("task info worker", slog.String("err", err.Error()))
 		return nil, httpresponse.ServerError()
@@ -213,11 +231,10 @@ func (s *WorkerServiceImpl) TaskInfo(ctx context.Context, workerID string, taskI
 }
 
 func (s *WorkerServiceImpl) RespondOnTask(ctx context.Context, workerID, taskID string) error {
-	filter := filters.New().
-		Add(filters.TaskByID(taskID)).
-		Add(filters.TaskByStatus(taskmodel.WaitingExecution))
-
-	task, err := s.store.Task().FindProj(ctx, filter.Filters(), taskmodel.ProjOnRespond)
+	task, err := s.store.Task().FindProj(
+		ctx,
+		filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByStatus(taskmodel.WaitingExecution)).Filters(),
+		taskmodel.ProjOnRespond)
 	switch {
 	case err == mongoStore.ErrNoTask:
 		return httpresponse.NewError(404, err.Error())
@@ -240,8 +257,10 @@ func (s *WorkerServiceImpl) RespondOnTask(ctx context.Context, workerID, taskID 
 		return httpresponse.ServerError()
 	}
 
-	filter = filters.New().Add(filters.UserByID(workerID))
-	worker, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.ProjOnlyBalance)
+	worker, err := s.store.User().FindProj(
+		ctx,
+		filters.New().Add(filters.UserByID(workerID)).Filters(),
+		usermodel.ProjOnlyBalance)
 	if err != nil {
 		s.log.Error("respond on task", slog.String("err", err.Error()))
 		return httpresponse.ServerError()
@@ -275,7 +294,6 @@ func (s *WorkerServiceImpl) RespondOnTask(ctx context.Context, workerID, taskID 
 }
 
 func (s *WorkerServiceImpl) TasksResponded(ctx context.Context, workerID string, v url.Values) ([]taskmodel.Task, error) {
-	filter := filters.New().Add(filters.TaskByAssigned(workerID))
 	limit, err := utils.ConvertStringToInt64(v.Get("limit"))
 	if err != nil || limit > 20 {
 		limit = 20 // max limit
@@ -285,7 +303,12 @@ func (s *WorkerServiceImpl) TasksResponded(ctx context.Context, workerID string,
 		skip = 0
 	}
 
-	tasks, err := s.store.Task().FindMany(ctx, filter.Filters(), taskmodel.ManyTasks, limit, skip)
+	tasks, err := s.store.Task().FindMany(
+		ctx,
+		filters.New().Add(filters.TaskByAssigned(workerID)).Filters(),
+		taskmodel.ManyTasks,
+		limit,
+		skip)
 	switch {
 	case err == mongoStore.ErrNoTask:
 		return nil, httpresponse.NewError(404, err.Error())
@@ -297,7 +320,6 @@ func (s *WorkerServiceImpl) TasksResponded(ctx context.Context, workerID string,
 	return tasks, nil
 }
 func (s *WorkerServiceImpl) Responds(ctx context.Context, workerID string, v url.Values) ([]respondmodel.Respond, error) {
-	filter := filters.New().Add(filters.RespondByWorkerID(workerID))
 	limit, err := utils.ConvertStringToInt64(v.Get("limit"))
 	if err != nil || limit > 20 {
 		limit = 20 // max limit
@@ -306,7 +328,11 @@ func (s *WorkerServiceImpl) Responds(ctx context.Context, workerID string, v url
 	if err != nil {
 		skip = 0
 	}
-	responds, err := s.store.Respond().FindMany(ctx, filter.Filters(), limit, skip)
+	responds, err := s.store.Respond().FindMany(
+		ctx,
+		filters.New().Add(filters.RespondByWorkerID(workerID)).Filters(),
+		limit,
+		skip)
 	switch {
 	case err == mongoStore.ErrNoRespond:
 		return nil, httpresponse.NewError(404, err.Error())

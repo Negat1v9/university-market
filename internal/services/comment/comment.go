@@ -31,8 +31,10 @@ func (s *CommentServiceImpl) Create(ctx context.Context, userID string, comment 
 		return "", err
 	}
 
-	filter := filters.New().Add(filters.TaskByID(comment.TaskID)).Add(filters.TaskByCreator(userID))
-	task, err := s.store.Task().FindProj(ctx, filter.Filters(), taskmodel.ProjOnCreateComment)
+	task, err := s.store.Task().FindProj(
+		ctx,
+		filters.New().Add(filters.TaskByID(comment.TaskID)).Add(filters.TaskByCreator(userID)).Filters(),
+		taskmodel.ProjOnCreateComment)
 	switch {
 	case err == mongoStore.ErrNoTask:
 		return "", httpresponse.NewError(404, err.Error())
@@ -66,8 +68,11 @@ func (s *CommentServiceImpl) UserComments(ctx context.Context, userID string, v 
 		skip = 0
 	}
 
-	filter := filters.New().Add(filters.CommentByCreator(userID))
-	comments, err := s.store.Comment().FindMany(ctx, filter.Filters(), limit, skip)
+	comments, err := s.store.Comment().FindMany(
+		ctx,
+		filters.New().Add(filters.CommentByCreator(userID)).Filters(),
+		limit,
+		skip)
 	switch {
 	case err == mongoStore.ErrNoComment:
 		return nil, httpresponse.NewError(404, err.Error())
@@ -89,8 +94,11 @@ func (s *CommentServiceImpl) WorkerComments(ctx context.Context, workerID string
 		skip = 0
 	}
 
-	filter := filters.New().Add(filters.CommentByWorker(workerID))
-	comments, err := s.store.Comment().FindMany(ctx, filter.Filters(), limit, skip)
+	comments, err := s.store.Comment().FindMany(
+		ctx,
+		filters.New().Add(filters.CommentByWorker(workerID)).Filters(),
+		limit,
+		skip)
 	switch {
 	case err == mongoStore.ErrNoComment:
 		return nil, httpresponse.NewError(404, err.Error())

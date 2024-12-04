@@ -25,8 +25,10 @@ func NewServiceUser(log *slog.Logger, store storage.Store) UserService {
 
 // Create - create new user in database if not exist return userId new user must contain telegram id
 func (s *UserServiceImpl) Create(ctx context.Context, newUser *usermodel.User) (string, error) {
-	filter := filters.NewCmplxFilter().Add(filters.UserByTgID(newUser.TelegramID))
-	user, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.OnlyID)
+	user, err := s.store.User().FindProj(
+		ctx,
+		filters.New().Add(filters.UserByTgID(newUser.TelegramID)).Filters(),
+		usermodel.OnlyID)
 
 	var userID string
 	switch {
@@ -49,8 +51,10 @@ func (s *UserServiceImpl) Create(ctx context.Context, newUser *usermodel.User) (
 }
 
 func (s *UserServiceImpl) Auth(ctx context.Context, userID string) error {
-	filter := filters.NewCmplxFilter().Add(filters.UserByID(userID))
-	_, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.OnlyID)
+	_, err := s.store.User().FindProj(
+		ctx,
+		filters.New().Add(filters.UserByID(userID)).Filters(),
+		usermodel.OnlyID)
 	switch {
 	case err == mongoStore.ErrNoUser:
 		return httpresponse.NewError(401, "not authorized")
@@ -61,8 +65,10 @@ func (s *UserServiceImpl) Auth(ctx context.Context, userID string) error {
 }
 
 func (s *UserServiceImpl) AuthWorker(ctx context.Context, userID string) error {
-	filter := filters.NewCmplxFilter().Add(filters.UserByID(userID))
-	worker, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.AuthWorker)
+	worker, err := s.store.User().FindProj(
+		ctx,
+		filters.New().Add(filters.UserByID(userID)).Filters(),
+		usermodel.AuthWorker)
 	switch {
 	case err == mongoStore.ErrNoUser:
 		return httpresponse.NewError(401, "not authorized")
@@ -82,7 +88,9 @@ func (s *UserServiceImpl) AuthWorker(ctx context.Context, userID string) error {
 }
 
 func (s *UserServiceImpl) User(ctx context.Context, userID string) (*usermodel.User, error) {
-	user, err := s.store.User().Find(ctx, filters.New().Add(filters.UserByID(userID)).Filters())
+	user, err := s.store.User().Find(
+		ctx,
+		filters.New().Add(filters.UserByID(userID)).Filters())
 	switch {
 	case err == mongoStore.ErrNoUser:
 		return nil, httpresponse.NewError(404, err.Error())
