@@ -241,6 +241,8 @@ func (s *WorkerServiceImpl) RespondOnTask(ctx context.Context, workerID, taskID 
 	case err != nil:
 		s.log.Error("respond on task", slog.String("err", err.Error()))
 		return httpresponse.ServerError()
+	case task.CreatedBy == workerID:
+		return httpresponse.NewError(409, "you are the creator of task")
 	}
 
 	if checkWorkerAlredyRespond(workerID, task.Responds) {
