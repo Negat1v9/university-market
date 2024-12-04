@@ -27,4 +27,13 @@ var (
 		"worker_info.description": 1,
 		"role":                    1,
 	}
+	ProjSuccessPayment = bson.M{
+		"_id":         1,
+		"referral_id": 1,
+		"balance":     1,
+	}
+	ProjOnlyBalance = bson.M{
+		"_id":     1,
+		"balance": 1,
+	}
 )

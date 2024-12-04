@@ -14,14 +14,18 @@ const (
 )
 
 type WorkerInfo struct {
-	Ban          bool   `bson:"ban,omitempty" json:"ban,omitempty"`                     // does the worker have a ban?
-	FullName     string `bson:"full_name,omitempty" json:"full_name,omitempty"`         // real name
-	Education    string `bson:"education,omitempty" json:"education,omitempty"`         //level of education worker
-	Experience   string `bson:"experience,omitempty" json:"experience,omitempty"`       // experience
-	StarsBalance int    `bson:"stars_balance,omitempty" json:"stars_balance,omitempty"` // balance of telegram stars
-	Description  string `bson:"description,omitempty" json:"description,omitempty"`     // Description of the worker
+	Ban        bool   `bson:"ban,omitempty" json:"ban,omitempty"`               // does the worker have a ban?
+	FullName   string `bson:"full_name,omitempty" json:"full_name,omitempty"`   // real name
+	Education  string `bson:"education,omitempty" json:"education,omitempty"`   //level of education worker
+	Experience string `bson:"experience,omitempty" json:"experience,omitempty"` // experience
+	// StarsBalance int    `bson:"stars_balance,omitempty" json:"stars_balance,omitempty"` // balance of telegram stars
+	Description string `bson:"description,omitempty" json:"description,omitempty"` // Description of the worker
 }
 
+type Balance struct {
+	NumberPayments int `bson:"number_payments" json:"-"`           //total number of balance top-ups
+	StarsBalance   int `bson:"stars_balance" json:"stars_balance"` // balance of telegram stars
+}
 type NotificationSettings struct {
 	SendSilent bool `bson:"send_silent,omitempty" json:"send_silent,omitempty"`
 }
@@ -33,7 +37,8 @@ type User struct {
 	PhoneNumber  string                `bson:"phone_number,omitempty" json:"phone_number,omitempty"` // phone number
 	ReferralID   int64                 `bson:"referral_id,omitempty" json:"referral_id,omitempty"`   // ID of the user who invited him
 	Notification *NotificationSettings `bson:"notification,omitempty" json:"notification,omitempty"`
-	Role         UserType              `bson:"role,omitempty" json:"-"`                            // user role
+	Role         UserType              `bson:"role,omitempty" json:"-"` // user role
+	Balance      *Balance              `bson:"balance,omitempty" json:"balance"`
 	WorkerInfo   *WorkerInfo           `bson:"worker_info,omitempty" json:"worker_info,omitempty"` // worker information if the user is an worker
 	CreatedAt    time.Time             `bson:"created_at,omitempty" json:"created_at"`             // Creation date
 	UpdatedAt    time.Time             `bson:"updated_at,omitempty" json:"updated_at"`             // Updated date
@@ -47,18 +52,21 @@ func NewUser(tgId int64, username, fullname string, referall int64) *User {
 		Notification: &NotificationSettings{
 			SendSilent: false,
 		},
-		Role:       RegularUser,
-		WorkerInfo: NewWorkerInfo(0, fullname),
+		Role: RegularUser,
+		Balance: &Balance{
+			NumberPayments: 0,
+			StarsBalance:   0,
+		},
+		WorkerInfo: NewWorkerInfo(fullname),
 		CreatedAt:  time.Now().UTC(),
 	}
 }
 
-func NewWorkerInfo(starsBalance int, fullName string) *WorkerInfo {
+func NewWorkerInfo(fullName string) *WorkerInfo {
 	return &WorkerInfo{
-		Ban:          false,
-		FullName:     fullName,
-		StarsBalance: starsBalance,
-		Description:  "",
+		Ban:         false,
+		FullName:    fullName,
+		Description: "",
 	}
 }
 

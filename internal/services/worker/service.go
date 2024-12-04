@@ -53,7 +53,7 @@ func (s *WorkerServiceImpl) Create(ctx context.Context, userID string, data *use
 	upd := usermodel.User{
 		PhoneNumber: data.PhoneNumber,
 		Role:        usermodel.Worker,
-		WorkerInfo:  usermodel.NewWorkerInfo(0, fullName), // TODO: start star balance ?
+		WorkerInfo:  usermodel.NewWorkerInfo(fullName),
 		UpdatedAt:   time.Now(),
 	}
 
@@ -197,13 +197,13 @@ func (s *WorkerServiceImpl) TaskInfo(ctx context.Context, workerID string, taskI
 
 	filter = filters.NewCmplxFilter().Add(filters.UserByID(workerID))
 
-	workerInfo, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.OnlyWorkerInfo)
+	workerInfo, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.ProjOnlyBalance)
 	if err != nil {
 		s.log.Error("task info worker", slog.String("err", err.Error()))
 		return nil, httpresponse.ServerError()
 	}
 
-	respondPrice := taskmodel.CalculateRespondStarPrice(task.Meta, workerInfo.WorkerInfo)
+	respondPrice := taskmodel.CalculateRespondStarPrice(task.Meta, workerInfo.Balance)
 	if respondPrice == 0 {
 		s.log.Error("task info worker", slog.String("err", "no info worker or task meta task ID - "+taskID))
 		return nil, httpresponse.ServerError()
@@ -241,22 +241,23 @@ func (s *WorkerServiceImpl) RespondOnTask(ctx context.Context, workerID, taskID 
 	}
 
 	filter = filters.New().Add(filters.UserByID(workerID))
-	worker, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.OnlyWorkerInfo)
+	worker, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.ProjOnlyBalance)
 	if err != nil {
 		s.log.Error("respond on task", slog.String("err", err.Error()))
 		return httpresponse.ServerError()
 	}
 
-	respondPrice := taskmodel.CalculateRespondStarPrice(task.Meta, worker.WorkerInfo)
+	respondPrice := taskmodel.CalculateRespondStarPrice(task.Meta, worker.Balance)
 	if respondPrice == 0 {
 		s.log.Error("respond on task", slog.String("err", "no info worker or task meta task ID - "+taskID))
 		return httpresponse.ServerError()
 	}
-	if respondPrice > worker.WorkerInfo.StarsBalance {
+	if respondPrice > worker.Balance.StarsBalance {
 		return httpresponse.NewError(406, "not enough funds")
 	}
 
-	worker.WorkerInfo.StarsBalance -= respondPrice
+	worker.Balance.StarsBalance -= respondPrice
+
 	updTask := &taskmodel.Task{
 		ID:       task.ID,
 		Responds: append(task.Responds, workerID),

@@ -2,8 +2,6 @@ package static
 
 import (
 	"fmt"
-
-	usermodel "github.com/Negat1v9/work-marketplace/model/userModel"
 )
 
 var (
@@ -28,8 +26,8 @@ func BalancePayment(amount int) string {
 	return fmt.Sprintf("Баланс вашего аккаунта успешно пополнен на %d звезд", amount)
 }
 
-func OnRespondFromWorker(worker *usermodel.WorkerInfo) string {
-	return fmt.Sprintf("<b>Новый отклик!</b>\nО работнике:\n<code>%s</code>", worker.Description)
+func OnRespondFromWorker() string {
+	return "<b>Новый отклик!</b>"
 }
 
 func SuccessAttachFiles() string {

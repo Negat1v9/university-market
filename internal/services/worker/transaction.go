@@ -43,7 +43,7 @@ func (s *WorkerServiceImpl) respondOnTaskTrx(ctx context.Context, createrTaskTgI
 
 		s.log.Debug("", slog.String("taskID", task.ID), slog.String("worker ID", worker.ID))
 
-		err = s.tgClient.SendRespond(ctx, createrTaskTgID, task.ID, worker)
+		err = s.tgClient.SendRespond(ctx, createrTaskTgID, task.ID, worker.ID)
 		if err != nil {
 			session.AbortTransaction(ctx)
 			return err

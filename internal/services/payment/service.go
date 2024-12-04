@@ -17,6 +17,8 @@ import (
 var (
 	// the minimum time that can pass after creating the first payment, which must pass
 	minPaymentTime time.Duration = time.Minute * 1
+	// the amount of telegram stars that users are entitled to if they participate in the referral program
+	bonusReferral int = 200
 )
 
 type PaymentServiceImpl struct {
@@ -33,7 +35,6 @@ func NewServicePayment(log *slog.Logger, tgBotToken string, store storage.Store)
 	}
 }
 
-// TEST
 func (s *PaymentServiceImpl) CreateInvoiceLink(ctx context.Context, workerID string, data *paymentmodel.PaymentLinkReq) (string, error) {
 	filter := filters.New().
 		Add(filters.PaymentByUser(workerID)).
@@ -75,7 +76,6 @@ func (s *PaymentServiceImpl) CreateInvoiceLink(ctx context.Context, workerID str
 	return link, nil
 }
 
-// TEST
 func (s *PaymentServiceImpl) SuccessBalancePayment(ctx context.Context, sp *paymentmodel.SuccessPayment) error {
 	payment, err := s.store.Payment().Find(ctx, filters.New().Add(filters.PaymentByID(sp.PaymentID)).Filters())
 	if err != nil {
@@ -85,16 +85,20 @@ func (s *PaymentServiceImpl) SuccessBalancePayment(ctx context.Context, sp *paym
 
 	filter := filters.New().Add(filters.UserByID(payment.UserID))
 
-	worker, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.OnlyWorkerInfo)
+	worker, err := s.store.User().FindProj(ctx, filter.Filters(), usermodel.ProjSuccessPayment)
 	if err != nil {
 		s.log.Error("success balance payment", slog.String("err", err.Error()))
 		return httpresponse.ServerError()
 	}
 
-	if worker.WorkerInfo != nil {
-		worker.WorkerInfo.StarsBalance += payment.Amount
+	if needBonus := s.updateReferral(ctx, worker); needBonus {
+		worker.Balance.StarsBalance += bonusReferral
+	}
+	if worker.Balance != nil {
+		worker.Balance.NumberPayments += 1
+		worker.Balance.StarsBalance += payment.Amount
 	} else {
-		s.log.Error("success balance payment", slog.String("err", usermodel.ErrWorkerInfoIsNil(worker.ID).Error()))
+		s.log.Error("success balance payment", slog.String("err", usermodel.ErrBalanceIsNil(worker.ID).Error()))
 		return httpresponse.ServerError()
 	}
 
@@ -103,10 +107,41 @@ func (s *PaymentServiceImpl) SuccessBalancePayment(ctx context.Context, sp *paym
 		TgPaymentID: sp.TgPaymentID,
 		Status:      paymentmodel.Success,
 	}
-	err = s.successBalanePayTrx(ctx, worker, updPayment)
+	err = s.successPaymentTrx(ctx, worker, updPayment)
 	if err != nil {
 		s.log.Error("success balance payment", slog.String("err", err.Error()))
 		return httpresponse.ServerError()
 	}
 	return nil
+}
+
+// returns true if you need a bonus for the referral program and false if the bonus is not credited
+func (s *PaymentServiceImpl) updateReferral(ctx context.Context, replenishment *usermodel.User) bool {
+	switch {
+	case replenishment.ReferralID == 0:
+		return false
+	case replenishment.Balance.NumberPayments > 0:
+		return false
+	}
+	referral, err := s.store.User().FindProj(
+		ctx,
+		filters.New().Add(filters.UserByTgID(replenishment.ReferralID)).Filters(),
+		usermodel.ProjOnlyBalance,
+	)
+	if err != nil {
+		s.log.Error("find referral", slog.Int64("referralID", referral.ReferralID))
+		return false
+	}
+
+	referral.Balance.StarsBalance += bonusReferral
+	_, err = s.store.User().Edit(
+		ctx,
+		filters.New().Add(filters.UserByID(referral.ID)).Filters(),
+		referral,
+	)
+	if err != nil {
+		s.log.Error("update referral", slog.Int64("referralID", referral.ReferralID))
+		return true
+	}
+	return true
 }

@@ -4,8 +4,8 @@ import usermodel "github.com/Negat1v9/work-marketplace/model/userModel"
 
 // Info: CalculateRespondStarPrice - calculation of the price of the respond to the task, how much it will cost the worker (amount in telegram stars valut)
 // if meta or wi == nil return 0
-func CalculateRespondStarPrice(meta *TaskMeta, wi *usermodel.WorkerInfo) int {
-	if meta == nil || wi == nil {
+func CalculateRespondStarPrice(meta *TaskMeta, balance *usermodel.Balance) int {
+	if meta == nil || balance == nil {
 		return 0
 	}
 	switch {

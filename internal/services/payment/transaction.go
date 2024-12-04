@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func (s *PaymentServiceImpl) successBalanePayTrx(ctx context.Context, user *usermodel.User, payment *paymentmodel.Payment) error {
+func (s *PaymentServiceImpl) successPaymentTrx(ctx context.Context, user *usermodel.User, payment *paymentmodel.Payment) error {
 	session, err := s.store.StartSession()
 	if err != nil {
 		return err

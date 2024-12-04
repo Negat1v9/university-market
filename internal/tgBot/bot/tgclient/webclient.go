@@ -6,13 +6,12 @@ import (
 	managerutils "github.com/Negat1v9/work-marketplace/internal/tgBot/bot/manager/utils"
 	msgcrtr "github.com/Negat1v9/work-marketplace/internal/tgBot/bot/manager/utils/msgcreater"
 	"github.com/Negat1v9/work-marketplace/internal/tgBot/bot/manager/utils/static"
-	usermodel "github.com/Negat1v9/work-marketplace/model/userModel"
 )
 
-func (c *Client) SendRespond(ctx context.Context, tgCreaterID int64, taskID string, worker *usermodel.User) error {
+func (c *Client) SendRespond(ctx context.Context, tgCreaterID int64, taskID, workerID string) error {
 
-	response := msgcrtr.CreateTextMsg(tgCreaterID, static.OnRespondFromWorker(worker.WorkerInfo))
-	response.ReplyMarkup = managerutils.CreateInlineRespondOnTask(c.cfg.WebAppBaseUrl, taskID, worker.ID)
+	response := msgcrtr.CreateTextMsg(tgCreaterID, static.OnRespondFromWorker())
+	response.ReplyMarkup = managerutils.CreateInlineRespondOnTask(c.cfg.WebAppBaseUrl, taskID, workerID)
 
 	return c.Send(response)
 }
