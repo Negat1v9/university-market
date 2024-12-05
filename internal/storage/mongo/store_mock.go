@@ -6,11 +6,11 @@ import (
 
 	"github.com/Negat1v9/work-marketplace/internal/storage"
 	mongo_mock "github.com/Negat1v9/work-marketplace/internal/storage/mock"
-	"github.com/golang/mock/gomock"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	gomock "go.uber.org/mock/gomock"
 )
 
 type StoreMock struct {

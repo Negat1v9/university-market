@@ -17,9 +17,9 @@ import (
 	"github.com/Negat1v9/work-marketplace/internal/web/middleware"
 	commentmodel "github.com/Negat1v9/work-marketplace/model/comment"
 	"github.com/Negat1v9/work-marketplace/pkg/utils"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	gomock "go.uber.org/mock/gomock"
 )
 
 var testJwt string

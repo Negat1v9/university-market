@@ -18,9 +18,9 @@ import (
 	taskHttp "github.com/Negat1v9/work-marketplace/internal/web/task/http"
 	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
 	"github.com/Negat1v9/work-marketplace/pkg/utils"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	gomock "go.uber.org/mock/gomock"
 )
 
 var testUserID string

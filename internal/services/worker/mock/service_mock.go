@@ -12,7 +12,7 @@ import (
 	respondmodel "github.com/Negat1v9/work-marketplace/model/respond"
 	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
 	usermodel "github.com/Negat1v9/work-marketplace/model/userModel"
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockWorkerService is a mock of WorkerService interface.

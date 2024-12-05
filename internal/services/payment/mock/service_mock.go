@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	paymentmodel "github.com/Negat1v9/work-marketplace/model/payment"
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockPaymentService is a mock of PaymentService interface.

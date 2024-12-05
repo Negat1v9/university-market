@@ -10,7 +10,7 @@ import (
 	reflect "reflect"
 
 	commentmodel "github.com/Negat1v9/work-marketplace/model/comment"
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockCommentService is a mock of CommentService interface.

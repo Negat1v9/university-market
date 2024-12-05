@@ -13,7 +13,7 @@ import (
 	user_service_mock "github.com/Negat1v9/work-marketplace/internal/services/user/mock"
 	workerservice "github.com/Negat1v9/work-marketplace/internal/services/worker"
 	worker_service_mock "github.com/Negat1v9/work-marketplace/internal/services/worker/mock"
-	"github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 type ServicesMock struct {

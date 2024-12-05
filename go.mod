@@ -5,10 +5,10 @@ go 1.23.4
 require (
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.2-0.20221020003552-4126fa611266
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/golang/mock v1.6.0
 	github.com/stretchr/testify v1.10.0
 	github.com/telegram-mini-apps/init-data-golang v1.1.5
 	go.mongodb.org/mongo-driver v1.17.1
+	go.uber.org/mock v0.5.0
 )
 
 require (

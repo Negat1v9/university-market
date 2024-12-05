@@ -14,7 +14,7 @@ import (
 	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
 	tgbotmodel "github.com/Negat1v9/work-marketplace/model/tgBot"
 	usermodel "github.com/Negat1v9/work-marketplace/model/userModel"
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 	bson "go.mongodb.org/mongo-driver/bson"
 )
 
@@ -463,6 +463,21 @@ func NewMockCommentRepository(ctrl *gomock.Controller) *MockCommentRepository {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockCommentRepository) EXPECT() *MockCommentRepositoryMockRecorder {
 	return m.recorder
+}
+
+// CountWorkerLikesDislikes mocks base method.
+func (m *MockCommentRepository) CountWorkerLikesDislikes(ctx context.Context, workerID string) (*commentmodel.CountLikeDislikeWorker, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountWorkerLikesDislikes", ctx, workerID)
+	ret0, _ := ret[0].(*commentmodel.CountLikeDislikeWorker)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountWorkerLikesDislikes indicates an expected call of CountWorkerLikesDislikes.
+func (mr *MockCommentRepositoryMockRecorder) CountWorkerLikesDislikes(ctx, workerID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountWorkerLikesDislikes", reflect.TypeOf((*MockCommentRepository)(nil).CountWorkerLikesDislikes), ctx, workerID)
 }
 
 // Create mocks base method.

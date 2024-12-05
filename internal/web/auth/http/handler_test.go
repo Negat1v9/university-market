@@ -7,8 +7,8 @@ import (
 	"github.com/Negat1v9/work-marketplace/internal/config"
 	mongoStore "github.com/Negat1v9/work-marketplace/internal/storage/mongo"
 	"github.com/Negat1v9/work-marketplace/pkg/utils"
-	"github.com/golang/mock/gomock"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	gomock "go.uber.org/mock/gomock"
 )
 
 var testJwt string

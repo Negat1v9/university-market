@@ -10,7 +10,7 @@ import (
 	reflect "reflect"
 
 	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockTaskService is a mock of TaskService interface.

@@ -21,9 +21,9 @@ import (
 	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
 	usermodel "github.com/Negat1v9/work-marketplace/model/userModel"
 	"github.com/Negat1v9/work-marketplace/pkg/utils"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	gomock "go.uber.org/mock/gomock"
 )
 
 var testJwt string

@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	usermodel "github.com/Negat1v9/work-marketplace/model/userModel"
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockUserService is a mock of UserService interface.
