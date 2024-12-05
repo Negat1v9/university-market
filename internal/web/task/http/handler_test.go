@@ -14,7 +14,6 @@ import (
 	task_service_mock "github.com/Negat1v9/work-marketplace/internal/services/task/mock"
 	user_service_mock "github.com/Negat1v9/work-marketplace/internal/services/user/mock"
 	mongoStore "github.com/Negat1v9/work-marketplace/internal/storage/mongo"
-	botmock "github.com/Negat1v9/work-marketplace/internal/tgBot/bot/mock"
 	"github.com/Negat1v9/work-marketplace/internal/web/middleware"
 	taskHttp "github.com/Negat1v9/work-marketplace/internal/web/task/http"
 	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
@@ -53,7 +52,7 @@ func TestGetUsersAllTasks(t *testing.T) {
 	ctrl = gomock.NewController(t)
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, &botmock.WebTgClientMock{}, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().Auth(gomock.Any(), testUserID).Return(nil)
@@ -84,7 +83,7 @@ func TestFindOne(t *testing.T) {
 
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, &botmock.WebTgClientMock{}, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().Auth(gomock.Any(), testUserID).Return(nil)
 
@@ -111,7 +110,7 @@ func TestCreateTask(t *testing.T) {
 
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, &botmock.WebTgClientMock{}, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().Auth(gomock.Any(), testUserID).Return(nil)
 
@@ -152,7 +151,7 @@ func TestUpdateMetaTask(t *testing.T) {
 
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, &botmock.WebTgClientMock{}, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().Auth(gomock.Any(), testUserID).Return(nil)
 
@@ -194,7 +193,7 @@ func TestSelectWorker(t *testing.T) {
 
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, &botmock.WebTgClientMock{}, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().Auth(gomock.Any(), testUserID).Return(nil)
 
@@ -223,7 +222,7 @@ func TestCompleteTask(t *testing.T) {
 
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, &botmock.WebTgClientMock{}, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().Auth(gomock.Any(), testUserID).Return(nil)
 
@@ -252,7 +251,7 @@ func TestDeleteTask(t *testing.T) {
 
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, &botmock.WebTgClientMock{}, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().Auth(gomock.Any(), testUserID).Return(nil)
 

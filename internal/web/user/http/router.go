@@ -16,7 +16,7 @@ func RestUserRouter(h *UserHandler, mw *middleware.MiddleWareManager) http.Handl
 	priviteMux.HandleFunc("GET /info/{id}", h.User)
 	// userMux.HandleFunc("PUT /update/{id}", h.Update)
 
-	userMux.Handle("/", http.StripPrefix("/", mw.AuthUser(priviteMux)))
+	userMux.Handle("/", mw.AuthUser(priviteMux))
 
 	return userMux
 }

@@ -55,7 +55,7 @@ func TestNewWorker(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, botClientMock, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().Auth(gomock.Any(), testUserID).Return(nil)
 
@@ -90,7 +90,7 @@ func TestIsWorker(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, botClientMock, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().Auth(gomock.Any(), gomock.Any()).Return(nil)
 
@@ -118,7 +118,7 @@ func TestPublicWorkerInfo(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, botClientMock, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	// userServiceMock.EXPECT().AuthWorker(gomock.Any(), testUserID).Return(nil)
 	userServiceMock.EXPECT().Auth(gomock.Any(), gomock.Any()).Return(nil)
@@ -148,7 +148,7 @@ func TestWorkerProfile(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, botClientMock, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().AuthWorker(gomock.Any(), testUserID).Return(nil)
 
@@ -176,7 +176,7 @@ func TestUpdateInfo(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, botClientMock, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().AuthWorker(gomock.Any(), testUserID).Return(nil)
 
@@ -211,7 +211,7 @@ func TestAvailableTasks(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, botClientMock, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().AuthWorker(gomock.Any(), testUserID).Return(nil)
 
@@ -240,7 +240,7 @@ func TestTaskInfo(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, botClientMock, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().AuthWorker(gomock.Any(), testUserID).Return(nil)
 
@@ -269,7 +269,7 @@ func TestRespondOnTask(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, botClientMock, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().AuthWorker(gomock.Any(), testUserID).Return(nil)
 
@@ -297,7 +297,7 @@ func TestTaskByResponded(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, botClientMock, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().AuthWorker(gomock.Any(), testUserID).Return(nil)
 
@@ -327,7 +327,7 @@ func TestGetResponds(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	serviceMock := sercicesMock.NewServiceMockBuilder(mockCfg, &mockLogger, botClientMock, storeMock, ctrl)
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
 	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
 	userServiceMock.EXPECT().AuthWorker(gomock.Any(), testUserID).Return(nil)
 
