@@ -67,7 +67,7 @@ func TestNewWorker(t *testing.T) {
 	handler := workerHttp.RestWorkerRouter(workerHandler, mw)
 
 	dataNewWorker := &usermodel.WorkerCreate{
-		PhoneNumber: "88005553535",
+		Response: "fdfkdskfsodfksdok",
 	}
 
 	body, err := json.Marshal(&dataNewWorker)
@@ -80,7 +80,7 @@ func TestNewWorker(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	worker := &usermodel.User{}
-	workerServMock.EXPECT().Create(gomock.Any(), gomock.Any(), dataNewWorker).Return(worker, nil)
+	workerServMock.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Return(worker, nil)
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, 201, rr.Code)

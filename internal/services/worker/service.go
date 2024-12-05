@@ -15,17 +15,20 @@ import (
 	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
 	usermodel "github.com/Negat1v9/work-marketplace/model/userModel"
 	httpresponse "github.com/Negat1v9/work-marketplace/pkg/httpResponse"
+	tgvalidation "github.com/Negat1v9/work-marketplace/pkg/tgValidation"
 	"github.com/Negat1v9/work-marketplace/pkg/utils"
 )
 
 type WorkerServiceImpl struct {
+	botToken string
 	log      *slog.Logger
 	tgClient tgbot.WebTgClient
 	store    storage.Store
 }
 
-func NewServiceWorker(log *slog.Logger, tgClient tgbot.WebTgClient, store storage.Store) WorkerService {
+func NewServiceWorker(log *slog.Logger, tgClient tgbot.WebTgClient, store storage.Store, botToken string) WorkerService {
 	return &WorkerServiceImpl{
+		botToken: botToken,
 		log:      log,
 		tgClient: tgClient,
 		store:    store,
@@ -36,7 +39,7 @@ func (s *WorkerServiceImpl) Create(ctx context.Context, userID string, data *use
 	user, err := s.store.User().FindProj(
 		ctx,
 		filters.New().Add(filters.UserByID(userID)).Filters(),
-		usermodel.WorkerPublic)
+		usermodel.ProjCreateWorker)
 	switch {
 	case err == mongoStore.ErrNoUser:
 		return nil, httpresponse.NewError(404, err.Error())
@@ -45,7 +48,18 @@ func (s *WorkerServiceImpl) Create(ctx context.Context, userID string, data *use
 		return nil, httpresponse.ServerError()
 	case user.Role == usermodel.Worker:
 		return nil, httpresponse.NewError(409, "alredy exist")
+	}
 
+	err = tgvalidation.ValidateInitData(data.Response, s.botToken)
+	if err != nil {
+		return nil, httpresponse.NewError(401, "forbiden")
+	}
+	responseReqContact, err := tgvalidation.ParsePhoneNumber(data.Response)
+	if err != nil {
+		return nil, httpresponse.NewError(400, err.Error())
+	}
+	if responseReqContact.UserID != user.TelegramID {
+		return nil, httpresponse.NewError(401, "forbiden")
 	}
 	fullName := ""
 	if user.WorkerInfo != nil {
@@ -53,7 +67,7 @@ func (s *WorkerServiceImpl) Create(ctx context.Context, userID string, data *use
 	}
 
 	upd := usermodel.User{
-		PhoneNumber: data.PhoneNumber,
+		PhoneNumber: responseReqContact.PhoneNumber,
 		Role:        usermodel.Worker,
 		WorkerInfo:  usermodel.NewWorkerInfo(fullName),
 		UpdatedAt:   time.Now(),

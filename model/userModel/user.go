@@ -77,7 +77,8 @@ type UserCreate struct {
 }
 
 type WorkerCreate struct {
-	PhoneNumber string `json:"phone_number"`
+	// is string get from telegram mini app on request contact
+	Response string `json:"response"`
 }
 
 type UserLoginReq struct {

@@ -29,7 +29,7 @@ func NewServiceBuilder(cfg *config.Config, log *slog.Logger, tgClient tgbot.WebT
 		PaymentService: paymentservice.NewServicePayment(log, cfg.WebConfig.TgBotToken, store),
 		TaskService:    taskservice.NewServiceTask(log, tgClient, store),
 		UserService:    userservice.NewServiceUser(log, store),
-		WorkerService:  workerservice.NewServiceWorker(log, tgClient, store),
+		WorkerService:  workerservice.NewServiceWorker(log, tgClient, store, cfg.WebConfig.TgBotToken),
 		CommentService: commentservice.NewServiceComment(log, store),
 	}
 }

@@ -36,4 +36,10 @@ var (
 		"_id":     1,
 		"balance": 1,
 	}
+	ProjCreateWorker = bson.M{
+		"_id":                   1,
+		"telegram_id":           1,
+		"worker_info.full_name": 1,
+		"role":                  1,
+	}
 )
