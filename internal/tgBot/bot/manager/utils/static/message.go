@@ -35,5 +35,5 @@ func SuccessAttachFiles() string {
 }
 
 func MsgShareContact(username string) string {
-	return fmt.Sprintf("Вы выбрали <code>%s</code> работка для своей работы, можете связаться с ним для уточнения деталей! @%s", username, username)
+	return fmt.Sprintf("Вы выбрали <code>%s</code> работника для своей работы, можете связаться с ним для уточнения деталей! @%s", username, username)
 }

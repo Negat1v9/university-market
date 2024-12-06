@@ -55,3 +55,13 @@ func CreateInlineOnWorkerSelected(baseUrl, taskID string) *tgbotapi.InlineKeyboa
 	)
 	return &kb
 }
+func CreateInlineAfterShareContact(baseUrl, taskID string) *tgbotapi.InlineKeyboardMarkup {
+	kb := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonWebApp("Работа", tgbotapi.WebAppInfo{
+				URL: fmt.Sprintf("%s/worker/task?taskID=%s", baseUrl, taskID),
+			}),
+		),
+	)
+	return &kb
+}

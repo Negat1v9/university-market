@@ -71,7 +71,7 @@ func (m *Manager) shareContact(ctx context.Context, cmd *tgbotmodel.UserCommand,
 	if err != nil {
 		return nil, err
 	}
-	markup := managerutils.CreateInlineOnPublichTask(m.webAppBaseUrl, cmd.TaskID)
+	markup := managerutils.CreateInlineAfterShareContact(m.webAppBaseUrl, cmd.TaskID)
 
 	return tgbotapi.NewEditMessageReplyMarkup(cb.From.ID, cb.Message.MessageID, *markup), nil
 }

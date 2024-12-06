@@ -25,9 +25,10 @@ func (m *Manager) manageText(ctx context.Context, msg *tgbotapi.Message) {
 	var response *tgbotapi.MessageConfig
 	switch {
 	case err == mongoStore.ErrNoTgCmd:
-		m.botClient.Send(msgcrtr.CreateTextMsg(msg.From.ID, static.NoTgCmdFinded))
+		// m.botClient.Send(msgcrtr.CreateTextMsg(msg.From.ID, static.NoTgCmdFinded))
 		return
 	case err != nil:
+		m.log.Error("manage message", slog.String("err", err.Error()))
 		m.botClient.Send(msgcrtr.CreateTextMsg(msg.From.ID, static.ErrBot))
 		return
 	}
@@ -35,6 +36,8 @@ func (m *Manager) manageText(ctx context.Context, msg *tgbotapi.Message) {
 	switch cmd.ExpectedAction {
 	case tgbotmodel.WaitingForFiles:
 		response, err = m.attachFilesTask(ctx, msg, cmd)
+	default:
+		return
 	}
 	if err != nil {
 		m.log.Error("manage message", slog.String("err", err.Error()))
