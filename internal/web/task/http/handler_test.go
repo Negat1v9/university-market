@@ -13,7 +13,7 @@ import (
 	sercicesMock "github.com/Negat1v9/work-marketplace/internal/services/mock"
 	task_service_mock "github.com/Negat1v9/work-marketplace/internal/services/task/mock"
 	user_service_mock "github.com/Negat1v9/work-marketplace/internal/services/user/mock"
-	mongoStore "github.com/Negat1v9/work-marketplace/internal/storage/mongo"
+	mongo_mock "github.com/Negat1v9/work-marketplace/internal/storage/mock"
 	"github.com/Negat1v9/work-marketplace/internal/web/middleware"
 	taskHttp "github.com/Negat1v9/work-marketplace/internal/web/task/http"
 	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
@@ -26,7 +26,7 @@ import (
 var testUserID string
 var testJwt string
 var mockLogger = slog.Logger{}
-var storeMock *mongoStore.StoreMock
+var storeMock *mongo_mock.MockStore
 var mockCfg *config.Config
 var ctrl *gomock.Controller
 
@@ -36,7 +36,7 @@ func TestMain(m *testing.M) {
 	defer ctrl.Finish()
 
 	mockCfg = config.NewConfigMock()
-	storeMock = mongoStore.NewMockStore(ctrl)
+	storeMock = mongo_mock.NewMockStore(ctrl)
 	testUserID = primitive.NewObjectID().Hex()
 
 	claims := &utils.Claims{

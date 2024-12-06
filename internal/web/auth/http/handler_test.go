@@ -5,14 +5,14 @@ import (
 	"testing"
 
 	"github.com/Negat1v9/work-marketplace/internal/config"
-	mongoStore "github.com/Negat1v9/work-marketplace/internal/storage/mongo"
+	mongo_mock "github.com/Negat1v9/work-marketplace/internal/storage/mock"
 	"github.com/Negat1v9/work-marketplace/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	gomock "go.uber.org/mock/gomock"
 )
 
 var testJwt string
-var storeMock *mongoStore.StoreMock
+var storeMock *mongo_mock.MockStore
 var mockCfg *config.Config
 var testUserID string
 
@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 	defer ctrl.Finish()
 
 	mockCfg = config.NewConfigMock()
-	storeMock = mongoStore.NewMockStore(ctrl)
+	storeMock = mongo_mock.NewMockStore(ctrl)
 	testUserID = primitive.NewObjectID().Hex()
 
 	claims := &utils.Claims{

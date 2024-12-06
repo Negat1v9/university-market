@@ -12,7 +12,7 @@ import (
 	comment_service_mock "github.com/Negat1v9/work-marketplace/internal/services/comment/mock"
 	sercicesMock "github.com/Negat1v9/work-marketplace/internal/services/mock"
 	user_service_mock "github.com/Negat1v9/work-marketplace/internal/services/user/mock"
-	mongoStore "github.com/Negat1v9/work-marketplace/internal/storage/mongo"
+	mongo_mock "github.com/Negat1v9/work-marketplace/internal/storage/mock"
 	commentHttp "github.com/Negat1v9/work-marketplace/internal/web/comment"
 	"github.com/Negat1v9/work-marketplace/internal/web/middleware"
 	commentmodel "github.com/Negat1v9/work-marketplace/model/comment"
@@ -23,7 +23,7 @@ import (
 )
 
 var testJwt string
-var storeMock *mongoStore.StoreMock
+var storeMock *mongo_mock.MockStore
 var mockCfg *config.Config
 var testUserID string
 
@@ -33,7 +33,7 @@ func TestMain(m *testing.M) {
 	defer ctrl.Finish()
 
 	mockCfg = config.NewConfigMock()
-	storeMock = mongoStore.NewMockStore(ctrl)
+	storeMock = mongo_mock.NewMockStore(ctrl)
 	testUserID = primitive.NewObjectID().Hex()
 
 	claims := &utils.Claims{
