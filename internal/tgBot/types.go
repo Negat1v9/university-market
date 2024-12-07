@@ -3,6 +3,7 @@ package tgbot
 import (
 	"context"
 
+	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -13,7 +14,7 @@ type TgBotClient interface {
 }
 
 type WebTgClient interface {
-	SendRespond(ctx context.Context, tgCreaterID int64, taskID string, workerID string) error
+	SendRespond(ctx context.Context, tgCreaterID int64, workerID string, task *taskmodel.Task) error
 	WaitFiles(ctx context.Context, tgCreaterID int64) error
-	SelectWorker(ctx context.Context, tgWorkerID int64, taskID string) error
+	SelectWorker(ctx context.Context, tgWorkerID int64, task *taskmodel.Task) error
 }

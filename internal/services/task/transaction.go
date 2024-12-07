@@ -64,7 +64,7 @@ func (s *TaskServiceImpl) selectWorkerOnTaskTrx(ctx context.Context, tgWorkerID 
 	}
 
 	err = mongo.WithSession(ctx, session, func(sc mongo.SessionContext) error {
-		_, err = s.store.Task().Update(sc, filters.New().Add(filters.TaskByID(upd.ID)).Filters(), upd)
+		updatedTask, err := s.store.Task().Update(sc, filters.New().Add(filters.TaskByID(upd.ID)).Filters(), upd)
 		if err != nil {
 			session.AbortTransaction(ctx)
 			return err
@@ -75,7 +75,7 @@ func (s *TaskServiceImpl) selectWorkerOnTaskTrx(ctx context.Context, tgWorkerID 
 			return err
 		}
 
-		err = s.tgClient.SelectWorker(ctx, tgWorkerID, taskID)
+		err = s.tgClient.SelectWorker(ctx, tgWorkerID, updatedTask)
 		if err != nil {
 			session.AbortTransaction(ctx)
 			return err

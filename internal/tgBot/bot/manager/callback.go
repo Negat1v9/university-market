@@ -66,7 +66,7 @@ func (m *Manager) shareContact(ctx context.Context, cmd *tgbotmodel.UserCommand,
 		return nil, err
 	}
 	msgForUser := msgcrtr.CreateTextMsg(userInfo.TelegramID, static.MsgShareContact(cb.From.UserName))
-
+	msgForUser.ReplyMarkup = managerutils.CreateInlineOnPublichTask(m.webAppBaseUrl, cmd.TaskID)
 	err = m.botClient.Send(msgForUser)
 	if err != nil {
 		return nil, err

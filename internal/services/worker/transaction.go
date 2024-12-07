@@ -29,7 +29,7 @@ func (s *WorkerServiceImpl) respondOnTaskTrx(ctx context.Context, createrTaskTgI
 			return err
 		}
 
-		_, err = s.store.Task().Update(sc, filters.New().Add(filters.TaskByID(task.ID)).Filters(), task)
+		updatedTask, err := s.store.Task().Update(sc, filters.New().Add(filters.TaskByID(task.ID)).Filters(), task)
 		if err != nil {
 			session.AbortTransaction(ctx)
 			return err
@@ -43,7 +43,7 @@ func (s *WorkerServiceImpl) respondOnTaskTrx(ctx context.Context, createrTaskTgI
 
 		s.log.Debug("", slog.String("taskID", task.ID), slog.String("worker ID", worker.ID))
 
-		err = s.tgClient.SendRespond(ctx, createrTaskTgID, task.ID, worker.ID)
+		err = s.tgClient.SendRespond(ctx, createrTaskTgID, worker.ID, updatedTask)
 		if err != nil {
 			session.AbortTransaction(ctx)
 			return err

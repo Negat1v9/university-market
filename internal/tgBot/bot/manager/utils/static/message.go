@@ -2,6 +2,8 @@ package static
 
 import (
 	"fmt"
+
+	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
 )
 
 var (
@@ -27,9 +29,12 @@ func BalancePayment(amount int) string {
 }
 
 func OnRespondFromWorker() string {
-	return "<b>Новый отклик!</b>"
+	return "🎉 <b>Новый отклик!</b>"
 }
 
+func AddInformationTask(meta *taskmodel.TaskMeta) string {
+	return fmt.Sprintf("\n\n<b>ℹ️ О работе:</b>\n⚪️ <u>Институт</u>: %s\n⚪️ <u>Задание</u>: %s\n⚪️ <u>Предмет</u>: %s\n", meta.TaskType, meta.TaskType, meta.Subject)
+}
 func SuccessAttachFiles() string {
 	return fmt.Sprintf("<b>Файл успешно добавлен</b>\n%s", WaitingFiles)
 }
