@@ -52,7 +52,7 @@ func (s *TaskServiceImpl) CreateTaskWithFilesTrx(ctx context.Context, tgUserID i
 	return taskID, err
 }
 
-func (s *TaskServiceImpl) selectWorkerOnTaskTrx(ctx context.Context, tgWorkerID int64, taskID string, upd *taskmodel.Task, tgCmd *tgbotmodel.UserCommand) error {
+func (s *TaskServiceImpl) selectWorkerOnTaskTrx(ctx context.Context, tgWorkerID int64, upd *taskmodel.Task, tgCmd *tgbotmodel.UserCommand) error {
 	session, err := s.store.StartSession()
 	if err != nil {
 		return err

@@ -204,7 +204,7 @@ func (s *TaskServiceImpl) SelectWorker(ctx context.Context, taskID, userID, work
 		Status:     taskmodel.InProgress,
 	}
 
-	err = s.selectWorkerOnTaskTrx(ctx, workerInfo.TelegramID, taskID, upd, tgCmd)
+	err = s.selectWorkerOnTaskTrx(ctx, workerInfo.TelegramID, upd, tgCmd)
 
 	if err != nil {
 		s.log.Error("select worker", slog.String("err", err.Error()))
