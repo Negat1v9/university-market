@@ -53,3 +53,32 @@ func (s *WorkerServiceImpl) respondOnTaskTrx(ctx context.Context, createrTaskTgI
 
 	return err
 }
+
+func (s *WorkerServiceImpl) sendTaskFilesTrx(ctx context.Context, workerTgID int64, updTask *taskmodel.Task, files []string) error {
+	session, err := s.store.StartSession()
+	if err != nil {
+		return err
+	}
+
+	err = session.StartTransaction()
+	if err != nil {
+		return err
+	}
+
+	err = mongo.WithSession(ctx, session, func(sc mongo.SessionContext) error {
+		_, err = s.store.Task().Update(sc, filters.New().Add(filters.TaskByID(updTask.ID)).Filters(), updTask)
+		if err != nil {
+			session.AbortTransaction(ctx)
+			return err
+		}
+
+		err = s.tgClient.SendFiles(ctx, workerTgID, files)
+		if err != nil {
+			session.AbortTransaction(ctx)
+			return err
+		}
+		return session.CommitTransaction(ctx)
+	})
+
+	return err
+}

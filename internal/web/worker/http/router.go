@@ -19,6 +19,7 @@ func RestWorkerRouter(h *WorkerHandler, mw *middleware.MiddleWareManager) http.H
 	priviteMux := http.NewServeMux()
 	priviteMux.HandleFunc("GET /profile", h.Worker)
 	priviteMux.HandleFunc("PUT /edit/info", h.Update)
+	priviteMux.HandleFunc("PUT /task/files/{id}", h.TaskFiles)
 	priviteMux.HandleFunc("GET /task/all", h.AvailableTasks)
 	priviteMux.HandleFunc("GET /task/info/{id}", h.TaskInfo)
 	priviteMux.HandleFunc("POST /task/respond/{id}", h.RespondOnTask)

@@ -42,4 +42,11 @@ var (
 		"assigned_to": 1,
 		"status":      1,
 	}
+	ProjOnSendFiles = bson.M{
+		"_id":        1,
+		"created_by": 1,
+		"status":     1,
+		"files_id":   1,
+		"files_send": 1,
+	}
 )

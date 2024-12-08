@@ -39,6 +39,7 @@ type Task struct {
 	Tags        []string   `bson:"tags,omitempty" json:"tags,omitempty"`                 // tags for search (subject task, etc.)
 	FilesID     []string   `bson:"files_id,omitempty" json:"-"`                          // url or identifier from telegram for task document or photos
 	Responds    []string   `bson:"responds,omitempty" json:"responds"`                   // array of IDs of workers who responded to the task
+	FilesSend   []string   `bson:"files_send,omitempty" json:"-"`                        // worker id who alredy recieve files
 	CreatedAt   time.Time  `bson:"created_at,omitempty" json:"created_at,omitempty"`     // Task creation date (UTC)
 	ComplitedAT time.Time  `bson:"completed_at,omitempty" json:"completed_at,omitempty"` // Job end date (UTC)
 	UpdatedAt   time.Time  `bson:"updated_at,omitempty" json:"updated_at,omitempty"`     // Date of last task update (UTC)

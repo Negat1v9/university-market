@@ -17,6 +17,7 @@ type WorkerService interface {
 	Update(ctx context.Context, workerID string, data *usermodel.WorkerInfo) (*usermodel.User, error)
 	AvailableTasks(ctx context.Context, v url.Values) ([]taskmodel.Task, error)
 	TaskInfo(ctx context.Context, workerID string, taskID string) (*taskmodel.InfoTaskRes, error)
+	SendTaskFiles(ctx context.Context, workerID, taskID string) error
 	RespondOnTask(ctx context.Context, workerID, taskID string) error
 	TasksResponded(ctx context.Context, workerID string, v url.Values) ([]taskmodel.Task, error)
 	Responds(ctx context.Context, workerID string, v url.Values) ([]respondmodel.Respond, error)

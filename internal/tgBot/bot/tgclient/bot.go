@@ -50,6 +50,11 @@ func (b *Client) Request(preCheckOut *tgbotapi.PreCheckoutConfig) error {
 	return err
 }
 
+func (b *Client) SendGroupMedia(msg tgbotapi.MediaGroupConfig) error {
+	_, err := b.client.SendMediaGroup(msg)
+	return err
+}
+
 func (b *Client) UpdatesChan() tgbotapi.UpdatesChannel {
 	u := tgbotapi.NewUpdate(0)
 

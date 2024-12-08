@@ -244,6 +244,51 @@ func (s *WorkerServiceImpl) TaskInfo(ctx context.Context, workerID string, taskI
 	return &taskmodel.InfoTaskRes{Task: task, QuantityFiles: len(task.FilesID), RespondPrice: respondPrice}, nil
 }
 
+func (s *WorkerServiceImpl) SendTaskFiles(ctx context.Context, workerID, taskID string) error {
+	task, err := s.store.Task().FindProj(
+		ctx,
+		filters.New().Add(filters.TaskByID(taskID)).Filters(),
+		taskmodel.ProjOnSendFiles)
+	switch {
+	case err == mongoStore.ErrNoTask:
+		return httpresponse.NewError(404, err.Error())
+	case err != nil:
+		s.log.Error("send task files", slog.String("err", err.Error()))
+		return httpresponse.ServerError()
+	case task.CreatedBy == workerID:
+		return httpresponse.NewError(409, "you are the creator of task")
+	case task.Status == taskmodel.Pending:
+		return httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
+	case len(task.FilesID) == 0:
+		return httpresponse.NewError(404, "no files")
+	}
+
+	worker, err := s.store.User().FindProj(
+		ctx,
+		filters.New().Add(filters.UserByID(workerID)).Filters(),
+		usermodel.OnlyTgID)
+	if err != nil {
+		s.log.Error("send task files", slog.String("err", err.Error()))
+		return httpresponse.ServerError()
+	}
+
+	if err = checkFilesAlredySend(workerID, task.FilesSend); err != nil {
+		return httpresponse.NewError(406, err.Error())
+	}
+
+	updTask := taskmodel.Task{
+		ID:        task.ID,
+		FilesSend: append(task.FilesSend, workerID),
+	}
+
+	err = s.sendTaskFilesTrx(ctx, worker.TelegramID, &updTask, task.FilesID)
+	if err != nil {
+		s.log.Error("send task files", slog.String("err", err.Error()))
+		return httpresponse.ServerError()
+	}
+	return nil
+}
+
 func (s *WorkerServiceImpl) RespondOnTask(ctx context.Context, workerID, taskID string) error {
 	task, err := s.store.Task().FindProj(
 		ctx,

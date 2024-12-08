@@ -152,6 +152,22 @@ func (h *WorkerHandler) TaskInfo(w http.ResponseWriter, r *http.Request) {
 	httpresponse.Response(w, 200, task)
 }
 
+func (h *WorkerHandler) TaskFiles(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), h.cfg.CtxTimeOut)
+	defer cancel()
+
+	taskID := r.PathValue("id")
+	workerID := r.Context().Value(middleware.CtxUserIDKey).(string)
+
+	err := h.service.SendTaskFiles(ctx, workerID, taskID)
+	if err != nil {
+		httpresponse.ResponseError(w, 500, err)
+		return
+	}
+
+	httpresponse.Response(w, 200, nil)
+}
+
 func (h *WorkerHandler) RespondOnTask(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), h.cfg.CtxTimeOut)
 	defer cancel()

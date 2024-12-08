@@ -265,6 +265,34 @@ func TestTaskInfo(t *testing.T) {
 	assert.Equal(t, 200, rr.Code)
 }
 
+func TestSendFiles(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
+	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
+	userServiceMock.EXPECT().AuthWorker(gomock.Any(), testUserID).Return(nil)
+
+	workerServMock := serviceMock.WorkerService.(*worker_service_mock.MockWorkerService)
+	workerHandler := workerHttp.New(mockCfg.WebConfig, workerServMock)
+
+	mw := middleware.New(mockCfg.WebConfig, serviceMock.UserService)
+
+	handler := workerHttp.RestWorkerRouter(workerHandler, mw)
+
+	req, err := http.NewRequest("PUT", "/task/files/id", nil)
+	assert.NoError(t, err)
+	req.Header.Set("Authorization", testJwt)
+
+	rr := httptest.NewRecorder()
+
+	workerServMock.EXPECT().SendTaskFiles(gomock.Any(), testUserID, "id").Return(nil)
+
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, 200, rr.Code)
+}
+
 func TestRespondOnTask(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()

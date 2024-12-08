@@ -7,6 +7,7 @@ import (
 	msgcrtr "github.com/Negat1v9/work-marketplace/internal/tgBot/bot/manager/utils/msgcreater"
 	"github.com/Negat1v9/work-marketplace/internal/tgBot/bot/manager/utils/static"
 	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func (c *Client) SendRespond(ctx context.Context, tgCreaterID int64, workerID string, task *taskmodel.Task) error {
@@ -39,8 +40,14 @@ func (c *Client) SelectWorker(ctx context.Context, tgWorkerID int64, task *taskm
 	return c.Send(response)
 }
 
-// func (c *Client) SendFiles(ctx context.Context, tgWorkerID int64, files []string) error {
+func (c *Client) SendFiles(ctx context.Context, tgWorkerID int64, files []string) error {
 
-// 	tgbotapi.NewMediaGroup(tgWorkerID)
-// 	return nil
-// }
+	groupFiles := make([]interface{}, 0, len(files))
+	for i := 0; i < len(files); i++ {
+		media := tgbotapi.NewInputMediaDocument(tgbotapi.FileID(files[i]))
+		groupFiles = append(groupFiles, media)
+	}
+	msg := tgbotapi.NewMediaGroup(tgWorkerID, groupFiles)
+
+	return c.SendGroupMedia(msg)
+}
