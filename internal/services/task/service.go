@@ -281,6 +281,8 @@ func (s *TaskServiceImpl) AttachFiles(ctx context.Context, taskID string, fileID
 		return err
 	case task.Status != taskmodel.Pending:
 		return httpresponse.NewError(409, "cannot be changed")
+	case len(task.FilesID) == 5:
+		return httpresponse.NewError(406, "the largest number files is 5")
 	}
 
 	updTask := &taskmodel.Task{

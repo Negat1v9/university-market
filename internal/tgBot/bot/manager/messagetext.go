@@ -50,10 +50,8 @@ func (m *Manager) manageText(ctx context.Context, msg *tgbotapi.Message) {
 func (m *Manager) attachFilesTask(ctx context.Context, msg *tgbotapi.Message, tgCmd *tgbotmodel.UserCommand) (*tgbotapi.MessageConfig, error) {
 	var fileID string
 	switch {
-	case msg.Photo == nil && msg.Document == nil:
+	case msg.Document == nil:
 		return msgcrtr.CreateTextMsg(msg.From.ID, static.FilesExpected), nil
-	case msg.Photo != nil:
-		fileID = msg.Photo[0].FileID
 	case msg.Document != nil:
 		fileID = msg.Document.FileID
 	}
