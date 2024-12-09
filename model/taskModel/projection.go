@@ -8,8 +8,9 @@ var (
 		"status": 1,
 	}
 	OnlyMeta = bson.M{
-		"_id":  1,
-		"meta": 1,
+		"_id":    1,
+		"status": 1,
+		"meta":   1,
 	}
 	ManyTasks = bson.M{
 		"_id":                 1,

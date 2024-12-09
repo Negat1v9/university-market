@@ -39,35 +39,19 @@ func (s *TaskServiceImpl) Create(ctx context.Context, userID string, meta *taskm
 	}
 	newTask := taskmodel.NewTask(userID, meta, createTags(meta))
 	// send message in chat with a description of how to attach files and create task
+	var taskID string
 	switch meta.WithFiles {
 	case true:
-		user, err := s.store.User().FindProj(ctx, filters.New().Add(filters.UserByID(userID)).Filters(), usermodel.OnlyTgID)
+		taskID, err = s.createTaskWithFiles(ctx, userID, newTask)
 		if err != nil {
-			s.log.Error("create task", slog.String("err", err.Error()))
-			return "", httpresponse.ServerError()
-		}
-		// deleting a command if it exists
-		err = s.store.TgCmd().Delete(ctx, user.TelegramID)
-		if err != nil && err != mongoStore.ErrNoTgCmd {
-			s.log.Error("create task", slog.String("err", err.Error()))
-			return "", httpresponse.ServerError()
+			return "", err
 		}
 
-		taskID, err := s.CreateTaskWithFilesTrx(ctx, user.TelegramID, newTask)
+	case false:
+		taskID, err = s.createTaskNoFiles(ctx, newTask)
 		if err != nil {
-			s.log.Error("create task", slog.String("err", err.Error()))
-			return "", httpresponse.ServerError()
+			return "", err
 		}
-		return taskID, nil
-
-	case false: // make the task ready for search worker
-		newTask.Status = taskmodel.WaitingExecution
-	}
-
-	taskID, err := s.store.Task().Create(ctx, newTask)
-	if err != nil {
-		s.log.Error("create task", slog.String("err", err.Error()))
-		return "", httpresponse.ServerError()
 	}
 
 	return taskID, nil
@@ -84,6 +68,8 @@ func (s *TaskServiceImpl) FindOne(ctx context.Context, userID, taskID string) (*
 	case err != nil:
 		s.log.Debug("find task", slog.String("err", err.Error()))
 		return nil, httpresponse.NewError(404, err.Error())
+	case task.Status == taskmodel.Deleted:
+		return nil, httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
 	}
 
 	return &taskmodel.InfoTaskRes{Task: task, QuantityFiles: len(task.FilesID)}, nil
@@ -102,6 +88,8 @@ func (s *TaskServiceImpl) UpdateTaskMeta(ctx context.Context, taskID, userID str
 	case err != nil:
 		s.log.Debug("update task", slog.String("err", err.Error()))
 		return nil, httpresponse.ServerError()
+	case task.Status == taskmodel.Deleted:
+		return nil, httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
 	}
 	// meta is a pointer check before working with the field
 	if task.Meta == nil {
@@ -134,6 +122,7 @@ func (s *TaskServiceImpl) UpdateTaskMeta(ctx context.Context, taskID, userID str
 func (s *TaskServiceImpl) FindUserTasks(ctx context.Context, userID string, v url.Values) ([]taskmodel.Task, error) {
 	filter := FindFilterTasks(v)
 	filter.Add(filters.TaskByCreator(userID))
+	filter.Add(filters.TaskByNoDeleted())
 
 	limit, err := utils.ConvertStringToInt64(v.Get("limit"))
 	if err != nil || limit > 20 {
@@ -162,11 +151,13 @@ func (s *TaskServiceImpl) SelectWorker(ctx context.Context, taskID, userID, work
 		filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID)).Filters(),
 		taskmodel.ProjOnRespond)
 	switch {
-	case err == mongoStore.ErrNoUser:
+	case err == mongoStore.ErrNoTask:
 		return httpresponse.NewError(404, err.Error())
 	case err != nil:
 		s.log.Error("select worker", slog.String("err", err.Error()))
 		return err
+	case task.Status == taskmodel.Deleted:
+		return httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
 	case task.Status != taskmodel.WaitingExecution:
 		return httpresponse.NewError(406, "task.status is not "+string(taskmodel.WaitingExecution))
 	}
@@ -220,11 +211,13 @@ func (s *TaskServiceImpl) CompleteTask(ctx context.Context, taskID, userID strin
 		filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID)).Filters(),
 		taskmodel.OnlyStatus)
 	switch {
-	case err == mongoStore.ErrNoUser:
+	case err == mongoStore.ErrNoTask:
 		return nil, httpresponse.NewError(404, err.Error())
 	case err != nil:
 		s.log.Error("select worker", slog.String("err", err.Error()))
 		return nil, err
+	case task.Status == taskmodel.Deleted:
+		return nil, httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
 	case task.Status != taskmodel.InProgress:
 		return nil, httpresponse.NewError(406, "task.status is not "+string(taskmodel.InProgress))
 	}
@@ -243,26 +236,46 @@ func (s *TaskServiceImpl) CompleteTask(ctx context.Context, taskID, userID strin
 }
 
 func (s *TaskServiceImpl) DeleteTask(ctx context.Context, taskID, userID string) error {
+	numberDeletedTasks, err := s.store.Task().Count(
+		ctx,
+		filters.New().Add(filters.TaskByCreator(userID)).Add(filters.TaskByIsDeleted()).Filters())
+	switch {
+	case err != nil:
+		s.log.Error("count for delete task", slog.String("ere", err.Error()))
+		return httpresponse.ServerError()
+	case numberDeletedTasks >= 3:
+		return httpresponse.NewError(429, "too many deletion attempts")
+	}
+
 	task, err := s.store.Task().FindProj(
 		ctx,
 		filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID)).Filters(),
-		taskmodel.OnlyStatus)
+		taskmodel.OnlyStatus,
+	)
 	switch {
-	case err == mongoStore.ErrNoUser:
+	case err == mongoStore.ErrNoTask:
 		return httpresponse.NewError(404, err.Error())
 	case err != nil:
-		s.log.Error("select worker", slog.String("err", err.Error()))
-		return err
-	case task.Status == taskmodel.Completed:
-		return httpresponse.NewError(406, "task.status is "+string(taskmodel.Completed))
+		s.log.Error("delete task", slog.String("err", err.Error()))
+		return httpresponse.ServerError()
+	case task.Status == taskmodel.Deleted:
+		return httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
 	}
 
-	err = s.store.Task().Delete(
+	delTime := time.Now().UTC()
+	delTask := taskmodel.Task{
+		ID:       taskID,
+		Status:   taskmodel.Deleted,
+		DeleteAt: &delTime,
+	}
+	_, err = s.store.Task().Update(
 		ctx,
-		filters.New().Add(filters.TaskByID(taskID)).Filters())
+		filters.New().Add(filters.TaskByID(taskID)).Filters(),
+		&delTask)
+
 	if err != nil {
 		s.log.Error("delete task", slog.String("err", err.Error()))
-		return err
+		return httpresponse.ServerError()
 	}
 	return nil
 }
@@ -279,6 +292,8 @@ func (s *TaskServiceImpl) AttachFiles(ctx context.Context, taskID string, fileID
 	case err != nil:
 		s.log.Error("attach files", slog.String("err", err.Error()))
 		return err
+	case task.Status == taskmodel.Deleted:
+		return httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
 	case task.Status != taskmodel.Pending:
 		return httpresponse.NewError(409, "cannot be changed")
 	case len(task.FilesID) == 5:
@@ -309,6 +324,8 @@ func (s *TaskServiceImpl) PublishTask(ctx context.Context, taskID string) error 
 	case err != nil:
 		s.log.Error("publich task", slog.String("err", err.Error()))
 		return err
+	case task.Status == taskmodel.Deleted:
+		return httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
 	case task.Status != taskmodel.Pending:
 		return httpresponse.NewError(409, "alredy publiched")
 	}
@@ -330,4 +347,35 @@ func (s *TaskServiceImpl) PublishTask(ctx context.Context, taskID string) error 
 	}
 
 	return nil
+}
+
+func (s *TaskServiceImpl) createTaskWithFiles(ctx context.Context, userID string, task *taskmodel.Task) (string, error) {
+	user, err := s.store.User().FindProj(ctx, filters.New().Add(filters.UserByID(userID)).Filters(), usermodel.OnlyTgID)
+	if err != nil {
+		s.log.Error("create task", slog.String("err", err.Error()))
+		return "", httpresponse.ServerError()
+	}
+	// deleting a command if it exists
+	err = s.store.TgCmd().Delete(ctx, user.TelegramID)
+	if err != nil && err != mongoStore.ErrNoTgCmd {
+		s.log.Error("create task", slog.String("err", err.Error()))
+		return "", httpresponse.ServerError()
+	}
+
+	taskID, err := s.CreateTaskWithFilesTrx(ctx, user.TelegramID, task)
+	if err != nil {
+		s.log.Error("create task", slog.String("err", err.Error()))
+		return "", httpresponse.ServerError()
+	}
+	return taskID, nil
+}
+
+func (s *TaskServiceImpl) createTaskNoFiles(ctx context.Context, task *taskmodel.Task) (string, error) {
+	task.Status = taskmodel.WaitingExecution
+	taskID, err := s.store.Task().Create(ctx, task)
+	if err != nil {
+		s.log.Error("create task", slog.String("err", err.Error()))
+		return "", httpresponse.ServerError()
+	}
+	return taskID, nil
 }

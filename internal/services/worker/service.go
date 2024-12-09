@@ -224,6 +224,8 @@ func (s *WorkerServiceImpl) TaskInfo(ctx context.Context, workerID string, taskI
 	case err != nil:
 		s.log.Error("task info worker", slog.String("err", err.Error()))
 		return nil, httpresponse.ServerError()
+	case task.Status == taskmodel.Deleted:
+		return nil, httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
 	}
 
 	workerInfo, err := s.store.User().FindProj(
@@ -255,11 +257,13 @@ func (s *WorkerServiceImpl) SendTaskFiles(ctx context.Context, workerID, taskID 
 	case err != nil:
 		s.log.Error("send task files", slog.String("err", err.Error()))
 		return httpresponse.ServerError()
-	case task.CreatedBy == workerID:
-		return httpresponse.NewError(409, "you are the creator of task")
-	case task.Status == taskmodel.Pending:
+	case task.Status == taskmodel.Deleted: // task is deleted
 		return httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
-	case len(task.FilesID) == 0:
+	case task.CreatedBy == workerID: // worker is creater
+		return httpresponse.NewError(409, "you are the creator of task")
+	case task.Status == taskmodel.Pending: // task not ready
+		return httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
+	case len(task.FilesID) == 0: // no files to send
 		return httpresponse.NewError(404, "no files")
 	}
 
@@ -300,6 +304,8 @@ func (s *WorkerServiceImpl) RespondOnTask(ctx context.Context, workerID, taskID 
 	case err != nil:
 		s.log.Error("respond on task", slog.String("err", err.Error()))
 		return httpresponse.ServerError()
+	case task.Status == taskmodel.Deleted: // task is deleted
+		return httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
 	case task.CreatedBy == workerID:
 		return httpresponse.NewError(409, "you are the creator of task")
 	}

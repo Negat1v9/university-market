@@ -13,6 +13,7 @@ const (
 	WaitingExecution TaskStatus = "we"  // Task is ready and workers can find it
 	InProgress       TaskStatus = "prg" // During execution
 	Completed        TaskStatus = "cmp" // Completed
+	Deleted          TaskStatus = "del" // Task is deleted
 )
 
 type TaskMeta struct {
@@ -43,6 +44,7 @@ type Task struct {
 	CreatedAt   time.Time  `bson:"created_at,omitempty" json:"created_at,omitempty"`     // Task creation date (UTC)
 	ComplitedAT time.Time  `bson:"completed_at,omitempty" json:"completed_at,omitempty"` // Job end date (UTC)
 	UpdatedAt   time.Time  `bson:"updated_at,omitempty" json:"updated_at,omitempty"`     // Date of last task update (UTC)
+	DeleteAt    *time.Time `bson:"delete_at,omitempty" json:"-"`                         // the field is optional; if it is filled in, it means that the document will be deleted by mongo
 }
 
 func NewTask(createdBy string, meta *TaskMeta, tags []string) *Task {

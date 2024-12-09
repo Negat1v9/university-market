@@ -62,6 +62,12 @@ func TaskByStatus(status taskmodel.TaskStatus) bson.E {
 func TaskByTags(tags []string) bson.E {
 	return bson.E{Key: "tags", Value: bson.M{"$in": tags}}
 }
+func TaskByIsDeleted() bson.E {
+	return bson.E{Key: "delete_at", Value: bson.M{"$exists": true}}
+}
+func TaskByNoDeleted() bson.E {
+	return bson.E{Key: "delete_at", Value: bson.M{"$exists": false}}
+}
 
 // -------------------------------------------------
 //	Payment FILTERS

@@ -31,6 +31,7 @@ type TaskRepository interface {
 	Find(ctx context.Context, filter bson.D) (*taskmodel.Task, error)
 	FindProj(ctx context.Context, filter bson.D, proj bson.M) (*taskmodel.Task, error)
 	FindMany(ctx context.Context, filter bson.D, proj bson.M, limit, skip int64) ([]taskmodel.Task, error)
+	Count(ctx context.Context, filter bson.D) (int64, error)
 	Update(ctx context.Context, filter bson.D, task *taskmodel.Task) (*taskmodel.Task, error)
 	Delete(ctx context.Context, filter bson.D) error
 }

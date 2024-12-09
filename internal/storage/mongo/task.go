@@ -92,6 +92,17 @@ func (r *taskRepository) FindProj(ctx context.Context, filter bson.D, proj bson.
 
 	return &task, nil
 }
+func (r *taskRepository) Count(ctx context.Context, filter bson.D) (int64, error) {
+	number, err := r.c.CountDocuments(ctx, filter)
+	switch {
+	case err == mongo.ErrNoDocuments:
+		return 0, nil
+	case err != nil:
+		return 0, err
+	}
+
+	return number, nil
+}
 func (r *taskRepository) Update(ctx context.Context, filter bson.D, task *taskmodel.Task) (*taskmodel.Task, error) {
 	task.UpdatedAt = time.Now().UTC()
 	taskID := task.ID
