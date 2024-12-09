@@ -37,6 +37,17 @@ func (s *TaskServiceImpl) Create(ctx context.Context, userID string, meta *taskm
 	if err != nil {
 		return "", err
 	}
+	numberWeTasks, err := s.store.Task().Count(
+		ctx,
+		filters.New().Add(filters.TaskByCreator(userID)).Add(filters.TaskByStatus(taskmodel.WaitingExecution)).Filters(),
+	)
+	switch {
+	case err != nil:
+		s.log.Error("count we tasks on create", slog.String("err", err.Error()))
+		return "", httpresponse.ServerError()
+	case numberWeTasks >= 10: // limit
+		return "", httpresponse.NewError(406, "too many unfinished tasks")
+	}
 	newTask := taskmodel.NewTask(userID, meta, createTags(meta))
 	// send message in chat with a description of how to attach files and create task
 	var taskID string
@@ -350,6 +361,18 @@ func (s *TaskServiceImpl) PublishTask(ctx context.Context, taskID string) error 
 }
 
 func (s *TaskServiceImpl) createTaskWithFiles(ctx context.Context, userID string, task *taskmodel.Task) (string, error) {
+	numberPendingTasks, err := s.store.Task().Count(
+		ctx,
+		filters.New().Add(filters.TaskByCreator(userID)).Add(filters.TaskByStatus(taskmodel.Pending)).Filters(),
+	)
+	switch {
+	case err != nil:
+		s.log.Error("count pending task on create", slog.String("err", err.Error()))
+		return "", httpresponse.ServerError()
+	case numberPendingTasks >= 1:
+		return "", httpresponse.NewError(409, "task with status pending exists")
+	}
+
 	user, err := s.store.User().FindProj(ctx, filters.New().Add(filters.UserByID(userID)).Filters(), usermodel.OnlyTgID)
 	if err != nil {
 		s.log.Error("create task", slog.String("err", err.Error()))
