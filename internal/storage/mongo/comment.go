@@ -25,6 +25,26 @@ func newCommentRepo(c *mongo.Collection) *commentRepository {
 		c: c,
 	}
 }
+
+func (r *commentRepository) createIndexes(ctx context.Context) ([]string, error) {
+	indexed := []mongo.IndexModel{
+		{
+			Keys:    bson.D{{Key: "creator_id", Value: 1}},
+			Options: options.Index().SetName("comment_creator_id_idx"),
+		},
+		{
+			Keys:    bson.D{{Key: "worker_id", Value: 1}},
+			Options: options.Index().SetName("comment_worker_id_idx"),
+		},
+		{
+			Keys:    bson.D{{Key: "created_at", Value: -1}},
+			Options: options.Index().SetName("comment_created_at_idx"),
+		},
+	}
+	res, err := r.c.Indexes().CreateMany(ctx, indexed)
+
+	return res, err
+}
 func (r *commentRepository) Create(ctx context.Context, comment *commentmodel.Comment) (string, error) {
 	comment.CreatedAt = time.Now().UTC()
 	res, err := r.c.InsertOne(ctx, comment)
@@ -39,6 +59,7 @@ func (r *commentRepository) FindMany(ctx context.Context, filter bson.D, limit, 
 	cur, err := r.c.Find(
 		ctx,
 		filter,
+		options.Find().SetSort(bson.M{"created_at": -1}),
 		options.Find().SetLimit(limit),
 		options.Find().SetSkip(skip),
 	)

@@ -26,6 +26,34 @@ func newTaskRepo(coll *mongo.Collection) *taskRepository {
 	}
 }
 
+func (r *taskRepository) createIndexes(ctx context.Context) ([]string, error) {
+	indexed := []mongo.IndexModel{
+		{
+			Keys:    bson.D{{Key: "tags", Value: 1}, {Key: "status", Value: 1}},
+			Options: options.Index().SetName("task_status_tags_idx"),
+		},
+		{
+			Keys:    bson.D{{Key: "created_by", Value: 1}},
+			Options: options.Index().SetName("task_created_by_idx"),
+		},
+		{
+			Keys:    bson.D{{Key: "assigned_to", Value: 1}},
+			Options: options.Index().SetName("task_assigned_to_idx"),
+		},
+		{
+			Keys:    bson.D{{Key: "created_at", Value: -1}},
+			Options: options.Index().SetName("task_created_at_idx"),
+		},
+		{
+			Keys:    bson.D{{Key: "delete_at", Value: 1}},
+			Options: options.Index().SetName("task_delete_at_idx").SetExpireAfterSeconds(60 * 60 * 24), // one day
+		},
+	}
+	res, err := r.c.Indexes().CreateMany(ctx, indexed)
+
+	return res, err
+}
+
 func (r *taskRepository) Create(ctx context.Context, task *taskmodel.Task) (string, error) {
 	task.CreatedAt = time.Now().UTC()
 
@@ -56,6 +84,7 @@ func (r *taskRepository) FindMany(ctx context.Context, filter bson.D, proj bson.
 	cur, err := r.c.Find(
 		ctx,
 		filter,
+		options.Find().SetSort(bson.M{"created_at": -1}),
 		options.Find().SetProjection(proj),
 		options.Find().SetLimit(limit),
 		options.Find().SetSkip(skip),

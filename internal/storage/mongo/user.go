@@ -26,6 +26,18 @@ func newUserRepo(coll *mongo.Collection) *userRepository {
 	}
 }
 
+func (r *userRepository) createIndexes(ctx context.Context) ([]string, error) {
+	indexed := []mongo.IndexModel{
+		{
+			Keys:    bson.D{{Key: "telegram_id", Value: 1}},
+			Options: options.Index().SetName("user_telegram_id_idx"),
+		},
+	}
+	res, err := r.c.Indexes().CreateMany(ctx, indexed)
+
+	return res, err
+}
+
 func (r *userRepository) Create(ctx context.Context, user *usermodel.User) (string, error) {
 	res, err := r.c.InsertOne(ctx, user)
 	id := res.InsertedID.(primitive.ObjectID)

@@ -25,6 +25,21 @@ func newRespondRepo(c *mongo.Collection) *respondRepository {
 		c: c,
 	}
 }
+func (r *respondRepository) createIndexes(ctx context.Context) ([]string, error) {
+	indexed := []mongo.IndexModel{
+		{
+			Keys:    bson.D{{Key: "worker_id", Value: 1}},
+			Options: options.Index().SetName("respond_worker_id_idx"),
+		},
+		{
+			Keys:    bson.D{{Key: "created_at", Value: -1}},
+			Options: options.Index().SetName("respond_created_at_idx"),
+		},
+	}
+	res, err := r.c.Indexes().CreateMany(ctx, indexed)
+
+	return res, err
+}
 func (r *respondRepository) Create(ctx context.Context, respond *respondmodel.Respond) (string, error) {
 	respond.CreatedAt = time.Now().UTC()
 	res, err := r.c.InsertOne(ctx, respond)
@@ -50,6 +65,7 @@ func (r *respondRepository) FindMany(ctx context.Context, filter bson.D, limit, 
 	cur, err := r.c.Find(
 		ctx,
 		filter,
+		options.Find().SetSort(bson.M{"created_at": -1}),
 		options.Find().SetLimit(limit),
 		options.Find().SetSkip(skip),
 	)

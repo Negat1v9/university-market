@@ -1,6 +1,9 @@
 package mongoStore
 
 import (
+	"context"
+	"log"
+
 	"github.com/Negat1v9/work-marketplace/internal/storage"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -25,15 +28,59 @@ type Store struct {
 }
 
 func New(db *mongo.Database) *Store {
-	return &Store{
+	s := &Store{
 		db: db,
 	}
+	s.userIndex()
+	s.taskIndex()
+	s.commentIndex()
+	s.respondIndex()
+	return s
 }
 
 func (s *Store) StartSession() (mongo.Session, error) {
 	session, err := s.db.Client().StartSession()
 
 	return session, err
+}
+
+func (s *Store) userIndex() {
+	s.userRepository = newUserRepo(s.db.Collection(userCollection))
+	indxs, err := s.userRepository.createIndexes(context.Background())
+	if err != nil {
+		log.Printf("error create user indexes %v", err)
+	} else {
+		log.Printf("create user indexes %v", indxs)
+	}
+
+}
+func (s *Store) taskIndex() {
+	s.taskRepository = newTaskRepo(s.db.Collection(taskCollection))
+	indxs, err := s.taskRepository.createIndexes(context.Background())
+	if err != nil {
+		log.Printf("error create task indexes %v", err)
+	} else {
+		log.Printf("create task indexes %v", indxs)
+	}
+}
+func (s *Store) commentIndex() {
+	s.commentRepository = newCommentRepo(s.db.Collection(commentCollection))
+	indxs, err := s.commentRepository.createIndexes(context.Background())
+	if err != nil {
+		log.Printf("error create comment indexes %v", err)
+	} else {
+		log.Printf("create comment indexes %v", indxs)
+	}
+}
+
+func (s *Store) respondIndex() {
+	s.respondRepository = newRespondRepo(s.db.Collection(respondCollection))
+	indxs, err := s.respondRepository.createIndexes(context.Background())
+	if err != nil {
+		log.Printf("error create respond indexes %v", err)
+	} else {
+		log.Printf("create respond indexes %v", indxs)
+	}
 }
 
 func (s *Store) User() storage.UserRepository {
