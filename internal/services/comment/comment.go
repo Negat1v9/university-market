@@ -94,9 +94,11 @@ func (s *CommentServiceImpl) WorkerComments(ctx context.Context, workerID string
 		skip = 0
 	}
 
+	filter := filters.New().Add(filters.CommentByWorker(workerID))
+	filtersComment(filter, v)
 	comments, err := s.store.Comment().FindMany(
 		ctx,
-		filters.New().Add(filters.CommentByWorker(workerID)).Filters(),
+		filter.Filters(),
 		limit,
 		skip)
 	switch {

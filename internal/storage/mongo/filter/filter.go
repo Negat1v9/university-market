@@ -104,3 +104,7 @@ func CommentByCreator(userID string) bson.E {
 func CommentByWorker(workerID string) bson.E {
 	return bson.E{Key: "worker_id", Value: workerID}
 }
+
+func CommentByIsLike(isLike bool) bson.E {
+	return bson.E{Key: "is_like", Value: isLike}
+}

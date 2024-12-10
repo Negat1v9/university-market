@@ -1,6 +1,9 @@
 package commentservice
 
 import (
+	"net/url"
+
+	filters "github.com/Negat1v9/work-marketplace/internal/storage/mongo/filter"
 	commentmodel "github.com/Negat1v9/work-marketplace/model/comment"
 	httpresponse "github.com/Negat1v9/work-marketplace/pkg/httpResponse"
 )
@@ -22,4 +25,12 @@ func beforeCreate(creatorID string, c *commentmodel.Comment) error {
 	}
 
 	return nil
+}
+
+func filtersComment(f *filters.CmplxFilters, v url.Values) {
+	if likes := v.Get("likes"); likes != "" {
+		f.Add(filters.CommentByIsLike(true))
+	} else if dislikes := v.Get("dislikes"); dislikes != "" {
+		f.Add(filters.CommentByIsLike(false))
+	}
 }
