@@ -33,7 +33,7 @@ func OnRespondFromWorker() string {
 }
 
 func AddInformationTask(meta *taskmodel.TaskMeta) string {
-	return fmt.Sprintf("\n\n<b>ℹ️ О работе:</b>\n⚪️ <u>Институт</u>: %s\n⚪️ <u>Задание</u>: %s\n⚪️ <u>Предмет</u>: %s\n", meta.TaskType, meta.TaskType, meta.Subject)
+	return fmt.Sprintf("\n\n<b>ℹ️ О работе:</b>\n⚪️ <u>Институт</u>: %s\n⚪️ <u>Задание</u>: %s\n⚪️ <u>Предмет</u>: %s\n", meta.University, meta.TaskType, meta.Subject)
 }
 func SuccessAttachFiles() string {
 	return fmt.Sprintf("<b>Файл успешно добавлен</b>\n%s", WaitingFiles)
