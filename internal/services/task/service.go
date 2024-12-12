@@ -37,6 +37,9 @@ func (s *TaskServiceImpl) Create(ctx context.Context, userID string, meta *taskm
 	if err != nil {
 		return "", err
 	}
+	if err := meta.ValidateMetaFields(); err != nil {
+		return "", httpresponse.NewError(406, err.Error())
+	}
 	numberWeTasks, err := s.store.Task().Count(
 		ctx,
 		filters.New().Add(filters.TaskByCreator(userID)).Add(filters.TaskByStatus(taskmodel.WaitingExecution)).Filters(),
@@ -89,6 +92,14 @@ func (s *TaskServiceImpl) FindOne(ctx context.Context, userID, taskID string) (*
 // Info: UpdateTaskMeta - updating the meta field of a task, returns the updated fields
 // only the user who created the task can change it
 func (s *TaskServiceImpl) UpdateTaskMeta(ctx context.Context, taskID, userID string, data *taskmodel.UpdateTaskMeta) (*taskmodel.Task, error) {
+	if err := beforeCreateUpdate(&data.Meta); err != nil {
+		return nil, err
+	}
+
+	if err := data.Meta.ValidateMetaFields(); err != nil {
+		return nil, httpresponse.NewError(406, err.Error())
+	}
+
 	task, err := s.store.Task().FindProj(
 		ctx,
 		filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID)).Filters(),
@@ -105,9 +116,6 @@ func (s *TaskServiceImpl) UpdateTaskMeta(ctx context.Context, taskID, userID str
 	// meta is a pointer check before working with the field
 	if task.Meta == nil {
 		task.Meta = &taskmodel.TaskMeta{}
-	}
-	if err = beforeCreateUpdate(&data.Meta); err != nil {
-		return nil, err
 	}
 
 	upd := taskmodel.Task{

@@ -152,6 +152,9 @@ func (s *WorkerServiceImpl) Worker(ctx context.Context, workerID string) (*userm
 }
 
 func (s *WorkerServiceImpl) Update(ctx context.Context, workerID string, data *usermodel.WorkerInfo) (*usermodel.User, error) {
+	if err := data.ValidateFields(); err != nil {
+		return nil, httpresponse.NewError(406, err.Error())
+	}
 	worker, err := s.store.User().Find(
 		ctx,
 		filters.New().Add(filters.UserByID(workerID)).Filters())
