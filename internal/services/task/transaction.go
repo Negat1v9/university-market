@@ -52,19 +52,20 @@ func (s *TaskServiceImpl) CreateTaskWithFilesTrx(ctx context.Context, tgUserID i
 	return taskID, err
 }
 
-func (s *TaskServiceImpl) selectWorkerOnTaskTrx(ctx context.Context, tgWorkerID int64, upd *taskmodel.Task, tgCmd *tgbotmodel.UserCommand) error {
+func (s *TaskServiceImpl) selectWorkerOnTaskTrx(ctx context.Context, tgWorkerID int64, upd *taskmodel.Task, tgCmd *tgbotmodel.UserCommand) (*taskmodel.Task, error) {
 	session, err := s.store.StartSession()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = session.StartTransaction()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	var updatedTask *taskmodel.Task
 	err = mongo.WithSession(ctx, session, func(sc mongo.SessionContext) error {
-		updatedTask, err := s.store.Task().Update(sc, filters.New().Add(filters.TaskByID(upd.ID)).Filters(), upd)
+		updatedTask, err = s.store.Task().Update(sc, filters.New().Add(filters.TaskByID(upd.ID)).Filters(), upd)
 		if err != nil {
 			session.AbortTransaction(ctx)
 			return err
@@ -84,5 +85,5 @@ func (s *TaskServiceImpl) selectWorkerOnTaskTrx(ctx context.Context, tgWorkerID 
 		return session.CommitTransaction(ctx)
 	})
 
-	return err
+	return updatedTask, err
 }

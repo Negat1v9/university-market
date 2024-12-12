@@ -113,13 +113,13 @@ func (h *TaskHandler) SelectWorker(w http.ResponseWriter, r *http.Request) {
 	taskID := r.PathValue("id")
 	workerID := r.PathValue("worker_id")
 
-	err := h.service.SelectWorker(ctx, taskID, userID, workerID)
+	taskInfo, err := h.service.SelectWorker(ctx, taskID, userID, workerID)
 	if err != nil {
 		httpresponse.ResponseError(w, 500, err)
 		return
 	}
 
-	httpresponse.Response(w, 200, nil)
+	httpresponse.Response(w, 200, taskInfo)
 }
 
 func (h *TaskHandler) CompleteTask(w http.ResponseWriter, r *http.Request) {

@@ -164,24 +164,24 @@ func (s *TaskServiceImpl) FindUserTasks(ctx context.Context, userID string, v ur
 	return tasks, nil
 }
 
-func (s *TaskServiceImpl) SelectWorker(ctx context.Context, taskID, userID, workerID string) error {
+func (s *TaskServiceImpl) SelectWorker(ctx context.Context, taskID, userID, workerID string) (*taskmodel.InfoTaskRes, error) {
 	task, err := s.store.Task().FindProj(
 		ctx,
 		filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID)).Filters(),
 		taskmodel.ProjOnRespond)
 	switch {
 	case err == mongoStore.ErrNoTask:
-		return httpresponse.NewError(404, err.Error())
+		return nil, httpresponse.NewError(404, err.Error())
 	case err != nil:
 		s.log.Error("select worker", slog.String("err", err.Error()))
-		return err
+		return nil, err
 	case task.Status == taskmodel.Deleted:
-		return httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
+		return nil, httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
 	case task.Status != taskmodel.WaitingExecution:
-		return httpresponse.NewError(406, "task.status is not "+string(taskmodel.WaitingExecution))
+		return nil, httpresponse.NewError(406, "task.status is not "+string(taskmodel.WaitingExecution))
 	}
 	if err = CheckWorkerRespond(workerID, task.Responds); err != nil {
-		return err
+		return nil, err
 	}
 
 	workerInfo, err := s.store.User().FindProj(
@@ -190,16 +190,16 @@ func (s *TaskServiceImpl) SelectWorker(ctx context.Context, taskID, userID, work
 		usermodel.OnlyTgID)
 	switch {
 	case err == mongoStore.ErrNoUser:
-		return httpresponse.NewError(404, err.Error())
+		return nil, httpresponse.NewError(404, err.Error())
 	case err != nil:
 		s.log.Error("select worker", slog.String("err", err.Error()))
-		return err
+		return nil, err
 	}
 
 	err = s.store.TgCmd().Delete(ctx, workerInfo.TelegramID)
 	if err != nil && err != mongoStore.ErrNoTgCmd {
 		s.log.Error("create task", slog.String("err", err.Error()))
-		return httpresponse.ServerError()
+		return nil, httpresponse.ServerError()
 	}
 	tgCmd := &tgbotmodel.UserCommand{
 		ID:             workerInfo.TelegramID,
@@ -214,14 +214,14 @@ func (s *TaskServiceImpl) SelectWorker(ctx context.Context, taskID, userID, work
 		Status:     taskmodel.InProgress,
 	}
 
-	err = s.selectWorkerOnTaskTrx(ctx, workerInfo.TelegramID, upd, tgCmd)
+	afterUpdate, err := s.selectWorkerOnTaskTrx(ctx, workerInfo.TelegramID, upd, tgCmd)
 
 	if err != nil {
 		s.log.Error("select worker", slog.String("err", err.Error()))
-		return err
+		return nil, err
 	}
 
-	return err
+	return &taskmodel.InfoTaskRes{Task: afterUpdate, QuantityFiles: len(afterUpdate.FilesID)}, nil
 }
 
 func (s *TaskServiceImpl) CompleteTask(ctx context.Context, taskID, userID string) (*taskmodel.InfoTaskRes, error) {

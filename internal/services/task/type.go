@@ -12,7 +12,7 @@ type TaskService interface {
 	FindOne(ctx context.Context, userID, taskID string) (*taskmodel.InfoTaskRes, error)
 	UpdateTaskMeta(ctx context.Context, taskID, userID string, data *taskmodel.UpdateTaskMeta) (*taskmodel.Task, error)
 	FindUserTasks(ctx context.Context, userID string, v url.Values) ([]taskmodel.Task, error)
-	SelectWorker(ctx context.Context, taskID, userID, workerID string) error
+	SelectWorker(ctx context.Context, taskID, userID, workerID string) (*taskmodel.InfoTaskRes, error)
 	CompleteTask(ctx context.Context, taskID, userID string) (*taskmodel.InfoTaskRes, error)
 	DeleteTask(ctx context.Context, taskID, userID string) error
 	AttachFiles(ctx context.Context, taskID string, fileID string) error
