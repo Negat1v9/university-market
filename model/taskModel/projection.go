@@ -12,6 +12,12 @@ var (
 		"status": 1,
 		"meta":   1,
 	}
+	ProjOnUpdateTask = bson.M{
+		"_id":        1,
+		"status":     1,
+		"meta":       1,
+		"updated_at": 1,
+	}
 	ManyTasks = bson.M{
 		"_id":                 1,
 		"status":              1,

@@ -3,6 +3,7 @@ package taskservice
 import (
 	"net/url"
 	"strings"
+	"time"
 
 	filters "github.com/Negat1v9/work-marketplace/internal/storage/mongo/filter"
 	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
@@ -85,4 +86,9 @@ func createTags(t *taskmodel.TaskMeta) []string {
 			strings.ToLower(strings.TrimSpace(t.TaskType)))
 	}
 	return tags
+}
+
+// checks the last update time true if it can be updated false if little time has passed
+func canUpdateTaskTime(updatedAt time.Time, delta time.Duration) bool {
+	return time.Now().UTC().Sub(updatedAt) >= delta
 }

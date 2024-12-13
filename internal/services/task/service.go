@@ -17,6 +17,11 @@ import (
 	"github.com/Negat1v9/work-marketplace/pkg/utils"
 )
 
+var (
+	// minimum time that must pass after the last update to update the task
+	deltaOnUpdateTask time.Duration = time.Minute * 60
+)
+
 type TaskServiceImpl struct {
 	log      *slog.Logger
 	tgClient tgbot.WebTgClient
@@ -103,7 +108,7 @@ func (s *TaskServiceImpl) UpdateTaskMeta(ctx context.Context, taskID, userID str
 	task, err := s.store.Task().FindProj(
 		ctx,
 		filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID)).Filters(),
-		taskmodel.OnlyMeta)
+		taskmodel.ProjOnUpdateTask)
 	switch {
 	case err == mongoStore.ErrNoTask:
 		return nil, httpresponse.NewError(404, err.Error())
@@ -112,6 +117,8 @@ func (s *TaskServiceImpl) UpdateTaskMeta(ctx context.Context, taskID, userID str
 		return nil, httpresponse.ServerError()
 	case task.Status == taskmodel.Deleted:
 		return nil, httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
+	case !canUpdateTaskTime(task.UpdatedAt, deltaOnUpdateTask):
+		return nil, httpresponse.NewError(406, "last update recently")
 	}
 	// meta is a pointer check before working with the field
 	if task.Meta == nil {
