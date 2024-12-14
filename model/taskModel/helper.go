@@ -12,15 +12,17 @@ func CalculateRespondStarPrice(meta *TaskMeta, balance *usermodel.Balance) int {
 	if meta == nil || balance == nil {
 		return 0
 	}
+	sumMinMax := meta.MinPrice + meta.MaxPrice
 	switch {
-	// case wi.WorkCompleted == 0:
-	// 	return 1
-	case meta.MinPrice <= 500:
-		return 100
-	case meta.MinPrice <= 1000:
-		return 150
+	// discount for workers with only two refills
+	case balance.NumberPayments <= 2:
+		return 10
+	case sumMinMax <= 1000:
+		return 80
+	case sumMinMax <= 5000:
+		return 120
 	default:
-		return 200
+		return 180
 	}
 
 }
