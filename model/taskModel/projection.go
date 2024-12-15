@@ -30,6 +30,19 @@ var (
 		"meta.task_type":      1,
 		"created_at":          1,
 	}
+	ProjManyTaskForUser = bson.M{
+		"_id":                 1,
+		"is_comment":          1,
+		"status":              1,
+		"meta.max_days_work":  1,
+		"meta.min_price":      1,
+		"meta.max_price":      1,
+		"meta.form_education": 1,
+		"meta.university":     1,
+		"meta.subject":        1,
+		"meta.task_type":      1,
+		"created_at":          1,
+	}
 	ProjOnRespond = bson.M{
 		"_id":            1,
 		"created_by":     1,

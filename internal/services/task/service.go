@@ -159,7 +159,7 @@ func (s *TaskServiceImpl) FindUserTasks(ctx context.Context, userID string, v ur
 		skip = 0
 	}
 
-	tasks, err := s.store.Task().FindMany(ctx, filter.Filters(), taskmodel.ManyTasks, limit, skip)
+	tasks, err := s.store.Task().FindMany(ctx, filter.Filters(), taskmodel.ProjManyTaskForUser, limit, skip)
 	switch {
 	case err == mongoStore.ErrNoTask:
 		return nil, httpresponse.NewError(404, err.Error())
