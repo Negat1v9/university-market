@@ -205,7 +205,8 @@ func TestSelectWorker(t *testing.T) {
 
 	workerID := primitive.NewObjectID().Hex()
 	taskID := primitive.NewObjectID().Hex()
-	taskservice.EXPECT().SelectWorker(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+	taskInfo := &taskmodel.InfoTaskRes{}
+	taskservice.EXPECT().SelectWorker(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(taskInfo, nil)
 
 	req, err := http.NewRequest("PUT", "/"+taskID+"/select/worker/"+workerID, nil)
 	assert.NoError(t, err)
