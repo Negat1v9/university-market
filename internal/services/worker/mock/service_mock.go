@@ -45,18 +45,18 @@ func (m *MockWorkerService) EXPECT() *MockWorkerServiceMockRecorder {
 }
 
 // AvailableTasks mocks base method.
-func (m *MockWorkerService) AvailableTasks(ctx context.Context, v url.Values) ([]taskmodel.Task, error) {
+func (m *MockWorkerService) AvailableTasks(ctx context.Context, workerID string, v url.Values) ([]taskmodel.Task, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AvailableTasks", ctx, v)
+	ret := m.ctrl.Call(m, "AvailableTasks", ctx, workerID, v)
 	ret0, _ := ret[0].([]taskmodel.Task)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // AvailableTasks indicates an expected call of AvailableTasks.
-func (mr *MockWorkerServiceMockRecorder) AvailableTasks(ctx, v any) *gomock.Call {
+func (mr *MockWorkerServiceMockRecorder) AvailableTasks(ctx, workerID, v any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AvailableTasks", reflect.TypeOf((*MockWorkerService)(nil).AvailableTasks), ctx, v)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AvailableTasks", reflect.TypeOf((*MockWorkerService)(nil).AvailableTasks), ctx, workerID, v)
 }
 
 // Create mocks base method.

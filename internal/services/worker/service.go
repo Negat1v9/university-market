@@ -184,10 +184,11 @@ func (s *WorkerServiceImpl) Update(ctx context.Context, workerID string, data *u
 	return afterWorker, nil
 }
 
-func (s *WorkerServiceImpl) AvailableTasks(ctx context.Context, v url.Values) ([]taskmodel.Task, error) {
+func (s *WorkerServiceImpl) AvailableTasks(ctx context.Context, workerID string, v url.Values) ([]taskmodel.Task, error) {
 	v.Del("status")
 	filter := taskservice.FindFilterTasks(v)
 	filter.Add(filters.TaskByStatus(taskmodel.WaitingExecution))
+	filter.Add(filters.TaskByNotCreator(workerID))
 
 	limit, err := utils.ConvertStringToInt64(v.Get("limit"))
 	if err != nil || limit > 20 {

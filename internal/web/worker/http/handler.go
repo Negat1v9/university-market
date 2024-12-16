@@ -127,7 +127,9 @@ func (h *WorkerHandler) AvailableTasks(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), h.cfg.CtxTimeOut)
 	defer cancel()
 
-	tasks, err := h.service.AvailableTasks(ctx, r.URL.Query())
+	workerID := r.Context().Value(middleware.CtxUserIDKey).(string)
+
+	tasks, err := h.service.AvailableTasks(ctx, workerID, r.URL.Query())
 	if err != nil {
 		httpresponse.ResponseError(w, 500, err)
 		return

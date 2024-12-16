@@ -68,6 +68,9 @@ func TaskByIsDeleted() bson.E {
 func TaskByNoDeleted() bson.E {
 	return bson.E{Key: "delete_at", Value: bson.M{"$exists": false}}
 }
+func TaskByNotCreator(creator string) bson.E {
+	return bson.E{Key: "created_by", Value: bson.M{"$ne": creator}}
+}
 
 // -------------------------------------------------
 //	Payment FILTERS

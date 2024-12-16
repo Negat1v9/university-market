@@ -229,7 +229,7 @@ func TestAvailableTasks(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	tasks := []taskmodel.Task{}
-	workerServMock.EXPECT().AvailableTasks(gomock.Any(), gomock.Any()).Return(tasks, nil)
+	workerServMock.EXPECT().AvailableTasks(gomock.Any(), gomock.Any(), gomock.Any()).Return(tasks, nil)
 
 	handler.ServeHTTP(rr, req)
 
