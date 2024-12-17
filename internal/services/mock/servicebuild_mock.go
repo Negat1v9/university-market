@@ -7,6 +7,8 @@ import (
 	comment_service_mock "github.com/Negat1v9/work-marketplace/internal/services/comment/mock"
 	paymentservice "github.com/Negat1v9/work-marketplace/internal/services/payment"
 	payment_service_mock "github.com/Negat1v9/work-marketplace/internal/services/payment/mock"
+	reportservice "github.com/Negat1v9/work-marketplace/internal/services/report"
+	report_service_mock "github.com/Negat1v9/work-marketplace/internal/services/report/mock"
 	taskservice "github.com/Negat1v9/work-marketplace/internal/services/task"
 	task_service_mock "github.com/Negat1v9/work-marketplace/internal/services/task/mock"
 	userservice "github.com/Negat1v9/work-marketplace/internal/services/user"
@@ -23,6 +25,7 @@ type ServicesMock struct {
 	UserService    userservice.UserService
 	WorkerService  workerservice.WorkerService
 	CommentService commentservice.CommentService
+	ReportService  reportservice.ReportService
 }
 
 func NewServiceMockBuilder(cntl *gomock.Controller) *ServicesMock {
@@ -33,5 +36,6 @@ func NewServiceMockBuilder(cntl *gomock.Controller) *ServicesMock {
 		UserService:    user_service_mock.NewMockUserService(cntl),
 		WorkerService:  worker_service_mock.NewMockWorkerService(cntl),
 		CommentService: comment_service_mock.NewMockCommentService(cntl),
+		ReportService:  report_service_mock.NewMockReportService(cntl),
 	}
 }
