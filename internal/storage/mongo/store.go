@@ -15,6 +15,7 @@ const (
 	respondCollection = "respond"
 	tgCmdCollection   = "tg_command"
 	commentCollection = "comment"
+	reportCollection  = "report"
 )
 
 type Store struct {
@@ -25,6 +26,7 @@ type Store struct {
 	*tgCmdRepository
 	*respondRepository
 	*commentRepository
+	*reportRepository
 }
 
 func New(db *mongo.Database) *Store {
@@ -35,6 +37,7 @@ func New(db *mongo.Database) *Store {
 	s.taskIndex()
 	s.commentIndex()
 	s.respondIndex()
+	s.reportIndex()
 	return s
 }
 
@@ -80,6 +83,15 @@ func (s *Store) respondIndex() {
 		log.Printf("error create respond indexes %v", err)
 	} else {
 		log.Printf("create respond indexes %v", indxs)
+	}
+}
+func (s *Store) reportIndex() {
+	s.reportRepository = newReportRepo(s.db.Collection(reportCollection))
+	indxs, err := s.reportRepository.createIndexes(context.Background())
+	if err != nil {
+		log.Printf("error create report indexes %v", err)
+	} else {
+		log.Printf("create report indexes %v", indxs)
 	}
 }
 
@@ -132,4 +144,12 @@ func (s *Store) Comment() storage.CommentRepository {
 
 	s.commentRepository = newCommentRepo(s.db.Collection(commentCollection))
 	return s.commentRepository
+}
+
+func (s *Store) Report() storage.ReportRepository {
+	if s.reportRepository != nil {
+		return s.reportRepository
+	}
+	s.reportRepository = newReportRepo(s.db.Collection(reportCollection))
+	return s.reportRepository
 }
