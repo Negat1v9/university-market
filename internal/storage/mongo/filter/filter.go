@@ -3,6 +3,7 @@ package filters
 import (
 	paymentmodel "github.com/Negat1v9/work-marketplace/model/payment"
 	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
+	usermodel "github.com/Negat1v9/work-marketplace/model/userModel"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -110,4 +111,24 @@ func CommentByWorker(workerID string) bson.E {
 
 func CommentByIsLike(isLike bool) bson.E {
 	return bson.E{Key: "is_like", Value: isLike}
+}
+
+// -------------------------------------------------
+//	Report FILTERS
+// -------------------------------------------------
+
+func ReportByReportedBy(creator string) bson.E {
+	return bson.E{Key: "reported_by.id", Value: creator}
+}
+
+func ReportByReportedUser(user string) bson.E {
+	return bson.E{Key: "reported_user.id", Value: user}
+}
+
+func ReportByTaskID(taskID string) bson.E {
+	return bson.E{Key: "task_id", Value: taskID}
+}
+
+func ReportByReporterByRole(role usermodel.UserType) bson.E {
+	return bson.E{Key: "reported_by.role", Value: role}
 }

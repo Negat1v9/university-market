@@ -7,6 +7,7 @@ import (
 	commentHttp "github.com/Negat1v9/work-marketplace/internal/web/comment"
 	"github.com/Negat1v9/work-marketplace/internal/web/middleware"
 	paymentHttp "github.com/Negat1v9/work-marketplace/internal/web/payment/http"
+	reportHttp "github.com/Negat1v9/work-marketplace/internal/web/report/http"
 	taskHttp "github.com/Negat1v9/work-marketplace/internal/web/task/http"
 	userHttp "github.com/Negat1v9/work-marketplace/internal/web/user/http"
 	workerHttp "github.com/Negat1v9/work-marketplace/internal/web/worker/http"
@@ -23,6 +24,7 @@ func (s *Server) InitRoutes() {
 	workerHandler := workerHttp.New(s.cfg.WebConfig, s.services.WorkerService)
 	paymentHandler := paymentHttp.New(s.cfg.WebConfig, s.services.PaymentService)
 	commentHandler := commentHttp.New(s.cfg.WebConfig, s.services.CommentService)
+	reportHandler := reportHttp.New(s.cfg.WebConfig, s.services.ReportService)
 
 	authRouter := authHttp.RestAuthRouter(authHandler, mw)
 	router.Handle("/auth/", http.StripPrefix("/auth", authRouter))
@@ -41,6 +43,9 @@ func (s *Server) InitRoutes() {
 
 	commentRouter := commentHttp.RestPaymentRouter(commentHandler, mw)
 	router.Handle("/comment/", http.StripPrefix("/comment", commentRouter))
+
+	reportRouter := reportHttp.RestReportRouter(reportHandler, mw)
+	router.Handle("/report/", http.StripPrefix("/report", reportRouter))
 
 	apiV1 := http.NewServeMux()
 

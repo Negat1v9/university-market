@@ -15,6 +15,7 @@ import (
 
 	commentmodel "github.com/Negat1v9/work-marketplace/model/comment"
 	paymentmodel "github.com/Negat1v9/work-marketplace/model/payment"
+	reportmodel "github.com/Negat1v9/work-marketplace/model/report"
 	respondmodel "github.com/Negat1v9/work-marketplace/model/respond"
 	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
 	tgbotmodel "github.com/Negat1v9/work-marketplace/model/tgBot"
@@ -562,4 +563,58 @@ func (m *MockCommentRepository) Update(arg0 context.Context, arg1 bson.D, arg2 *
 func (mr *MockCommentRepositoryMockRecorder) Update(arg0, arg1, arg2 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockCommentRepository)(nil).Update), arg0, arg1, arg2)
+}
+
+// MockReportRepository is a mock of ReportRepository interface.
+type MockReportRepository struct {
+	ctrl     *gomock.Controller
+	recorder *MockReportRepositoryMockRecorder
+	isgomock struct{}
+}
+
+// MockReportRepositoryMockRecorder is the mock recorder for MockReportRepository.
+type MockReportRepositoryMockRecorder struct {
+	mock *MockReportRepository
+}
+
+// NewMockReportRepository creates a new mock instance.
+func NewMockReportRepository(ctrl *gomock.Controller) *MockReportRepository {
+	mock := &MockReportRepository{ctrl: ctrl}
+	mock.recorder = &MockReportRepositoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockReportRepository) EXPECT() *MockReportRepositoryMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockReportRepository) Create(arg0 context.Context, arg1 *reportmodel.Report) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", arg0, arg1)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockReportRepositoryMockRecorder) Create(arg0, arg1 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockReportRepository)(nil).Create), arg0, arg1)
+}
+
+// FindOne mocks base method.
+func (m *MockReportRepository) FindOne(arg0 context.Context, arg1 bson.D) (*reportmodel.Report, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOne", arg0, arg1)
+	ret0, _ := ret[0].(*reportmodel.Report)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOne indicates an expected call of FindOne.
+func (mr *MockReportRepositoryMockRecorder) FindOne(arg0, arg1 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockReportRepository)(nil).FindOne), arg0, arg1)
 }

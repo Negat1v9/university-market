@@ -10,4 +10,5 @@ type Store interface {
 	TgCmd() TgCommandRepository
 	Respond() RespondRepository
 	Comment() CommentRepository
+	Report() ReportRepository
 }

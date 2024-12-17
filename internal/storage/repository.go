@@ -5,6 +5,7 @@ import (
 
 	commentmodel "github.com/Negat1v9/work-marketplace/model/comment"
 	paymentmodel "github.com/Negat1v9/work-marketplace/model/payment"
+	reportmodel "github.com/Negat1v9/work-marketplace/model/report"
 	respondmodel "github.com/Negat1v9/work-marketplace/model/respond"
 	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
 	tgbotmodel "github.com/Negat1v9/work-marketplace/model/tgBot"
@@ -57,4 +58,9 @@ type CommentRepository interface {
 	CountWorkerLikesDislikes(ctx context.Context, workerID string) (*commentmodel.CountLikeDislikeWorker, error)
 	Update(context.Context, bson.D, *commentmodel.Comment) error
 	Delete(context.Context, bson.D) error
+}
+
+type ReportRepository interface {
+	Create(context.Context, *reportmodel.Report) (string, error)
+	FindOne(context.Context, bson.D) (*reportmodel.Report, error)
 }

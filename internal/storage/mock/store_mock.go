@@ -69,6 +69,20 @@ func (mr *MockStoreMockRecorder) Payment() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Payment", reflect.TypeOf((*MockStore)(nil).Payment))
 }
 
+// Report mocks base method.
+func (m *MockStore) Report() storage.ReportRepository {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Report")
+	ret0, _ := ret[0].(storage.ReportRepository)
+	return ret0
+}
+
+// Report indicates an expected call of Report.
+func (mr *MockStoreMockRecorder) Report() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Report", reflect.TypeOf((*MockStore)(nil).Report))
+}
+
 // Respond mocks base method.
 func (m *MockStore) Respond() storage.RespondRepository {
 	m.ctrl.T.Helper()
