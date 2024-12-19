@@ -33,6 +33,7 @@ func NewReport(reportBy string, reportRole usermodel.UserType, newReport *NewRep
 			ID: newReport.ReportUser,
 			// Role: usermodel.Worker,
 		},
+		TaskID:      newReport.TaskID,
 		Reason:      newReport.Reason,
 		Description: newReport.Description,
 		CreatedAt:   time.Now().UTC(),
