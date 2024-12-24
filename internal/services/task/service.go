@@ -144,7 +144,6 @@ func (s *TaskServiceImpl) UpdateTaskMeta(ctx context.Context, taskID, userID str
 	return &taskmodel.InfoTaskRes{Task: afterTask, QuantityFiles: len(afterTask.FilesID)}, nil
 }
 
-// TEST
 func (s *TaskServiceImpl) RaiseTask(ctx context.Context, taskID string, userID string) (*taskmodel.InfoTaskRes, error) {
 	task, err := s.store.Task().FindProj(
 		ctx,
@@ -160,18 +159,18 @@ func (s *TaskServiceImpl) RaiseTask(ctx context.Context, taskID string, userID s
 		return nil, httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
 	case task.Status != taskmodel.WaitingExecution:
 		return nil, httpresponse.NewError(406, "task.status is not "+string(taskmodel.WaitingExecution))
-	case !canRaiseTask(task.CreatedAt, deltaOnRaiseTask):
+	case !canRaiseTask(task.CreatedAt, deltaOnRaiseTask, task.OnPromotion):
 		return nil, httpresponse.NewError(422, "task can't be raised")
 	}
 	updTask := &taskmodel.Task{
 		OnPromotion: true,
 		UpdatedAt:   time.Now().UTC(),
 	}
-	updTask, err = s.store.Task().Update(
+	afterTask, err := s.store.Task().Update(
 		ctx,
 		filters.New().Add(filters.TaskByID(taskID)).Filters(),
 		updTask)
-	return &taskmodel.InfoTaskRes{Task: updTask, QuantityFiles: len(updTask.FilesID)}, nil
+	return &taskmodel.InfoTaskRes{Task: afterTask, QuantityFiles: len(afterTask.FilesID)}, nil
 }
 
 // Info: FindUserTasks - find all user tasks support quary filters

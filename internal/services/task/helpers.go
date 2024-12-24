@@ -94,6 +94,9 @@ func canUpdateTaskTime(updatedAt time.Time, delta time.Duration) bool {
 }
 
 // checks the last create time true if it can be raised false if little time has passed
-func canRaiseTask(createdAt time.Time, delta time.Duration) bool {
+func canRaiseTask(createdAt time.Time, delta time.Duration, onPromotion bool) bool {
+	if onPromotion {
+		return false
+	}
 	return time.Now().UTC().Sub(createdAt) >= delta
 }

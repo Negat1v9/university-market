@@ -188,6 +188,35 @@ func TestUpdateMetaTask(t *testing.T) {
 	assert.Equal(t, 200, rr.Code)
 }
 
+func TestRaiseTask(t *testing.T) {
+	ctrl = gomock.NewController(t)
+
+	defer ctrl.Finish()
+
+	serviceMock := sercicesMock.NewServiceMockBuilder(ctrl)
+	userServiceMock := serviceMock.UserService.(*user_service_mock.MockUserService)
+	userServiceMock.EXPECT().Auth(gomock.Any(), testUserID).Return(nil)
+
+	taskservice := serviceMock.TaskService.(*task_service_mock.MockTaskService)
+	taskHandler := taskHttp.New(mockCfg.WebConfig, serviceMock.TaskService)
+
+	mw := middleware.New(mockCfg.WebConfig, serviceMock.UserService)
+	hander := taskHttp.RestTaskRouter(taskHandler, mw)
+
+	taskID := primitive.NewObjectID().Hex()
+	taskInfo := &taskmodel.InfoTaskRes{}
+	taskservice.EXPECT().RaiseTask(gomock.Any(), taskID, testUserID).Return(taskInfo, nil)
+
+	req, err := http.NewRequest("PUT", "/raise/"+taskID, nil)
+	assert.NoError(t, err)
+	req.Header.Set("Authorization", testJwt)
+
+	rr := httptest.NewRecorder()
+	hander.ServeHTTP(rr, req)
+
+	assert.Equal(t, 200, rr.Code)
+}
+
 func TestSelectWorker(t *testing.T) {
 	ctrl = gomock.NewController(t)
 
