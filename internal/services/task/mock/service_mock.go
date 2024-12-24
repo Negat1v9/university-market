@@ -160,10 +160,10 @@ func (mr *MockTaskServiceMockRecorder) SelectWorker(ctx, taskID, userID, workerI
 }
 
 // UpdateTaskMeta mocks base method.
-func (m *MockTaskService) UpdateTaskMeta(ctx context.Context, taskID, userID string, data *taskmodel.UpdateTaskMeta) (*taskmodel.Task, error) {
+func (m *MockTaskService) UpdateTaskMeta(ctx context.Context, taskID, userID string, data *taskmodel.UpdateTaskMeta) (*taskmodel.InfoTaskRes, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateTaskMeta", ctx, taskID, userID, data)
-	ret0, _ := ret[0].(*taskmodel.Task)
+	ret0, _ := ret[0].(*taskmodel.InfoTaskRes)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

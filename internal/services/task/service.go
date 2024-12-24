@@ -96,7 +96,7 @@ func (s *TaskServiceImpl) FindOne(ctx context.Context, userID, taskID string) (*
 
 // Info: UpdateTaskMeta - updating the meta field of a task, returns the updated fields
 // only the user who created the task can change it
-func (s *TaskServiceImpl) UpdateTaskMeta(ctx context.Context, taskID, userID string, data *taskmodel.UpdateTaskMeta) (*taskmodel.Task, error) {
+func (s *TaskServiceImpl) UpdateTaskMeta(ctx context.Context, taskID, userID string, data *taskmodel.UpdateTaskMeta) (*taskmodel.InfoTaskRes, error) {
 	if err := beforeCreateUpdate(&data.Meta); err != nil {
 		return nil, err
 	}
@@ -140,7 +140,7 @@ func (s *TaskServiceImpl) UpdateTaskMeta(ctx context.Context, taskID, userID str
 		return nil, httpresponse.ServerError()
 	}
 
-	return afterTask, nil
+	return &taskmodel.InfoTaskRes{Task: afterTask, QuantityFiles: len(afterTask.FilesID)}, nil
 }
 
 // Info: FindUserTasks - find all user tasks support quary filters
