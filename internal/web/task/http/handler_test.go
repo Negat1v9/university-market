@@ -173,7 +173,7 @@ func TestUpdateMetaTask(t *testing.T) {
 		Description:   "updated",
 	}
 
-	task := &taskmodel.Task{}
+	task := &taskmodel.InfoTaskRes{}
 	taskservice.EXPECT().UpdateTaskMeta(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(task, nil)
 
 	data, err := json.Marshal(&updTask)
