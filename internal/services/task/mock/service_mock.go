@@ -144,6 +144,21 @@ func (mr *MockTaskServiceMockRecorder) PublishTask(ctx, taskID any) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PublishTask", reflect.TypeOf((*MockTaskService)(nil).PublishTask), ctx, taskID)
 }
 
+// RaiseTask mocks base method.
+func (m *MockTaskService) RaiseTask(ctx context.Context, taskID, userID string) (*taskmodel.InfoTaskRes, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RaiseTask", ctx, taskID, userID)
+	ret0, _ := ret[0].(*taskmodel.InfoTaskRes)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RaiseTask indicates an expected call of RaiseTask.
+func (mr *MockTaskServiceMockRecorder) RaiseTask(ctx, taskID, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RaiseTask", reflect.TypeOf((*MockTaskService)(nil).RaiseTask), ctx, taskID, userID)
+}
+
 // SelectWorker mocks base method.
 func (m *MockTaskService) SelectWorker(ctx context.Context, taskID, userID, workerID string) (*taskmodel.InfoTaskRes, error) {
 	m.ctrl.T.Helper()

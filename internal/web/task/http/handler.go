@@ -90,6 +90,22 @@ func (h *TaskHandler) UpdateTaskMeta(w http.ResponseWriter, r *http.Request) {
 	httpresponse.Response(w, 200, updTask)
 }
 
+func (h *TaskHandler) RaiseTask(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), h.cfg.CtxTimeOut)
+	defer cancel()
+
+	userID := r.Context().Value(middleware.CtxUserIDKey).(string)
+	taskID := r.PathValue("id")
+
+	taskInfo, err := h.service.RaiseTask(ctx, taskID, userID)
+	if err != nil {
+		httpresponse.ResponseError(w, 500, err)
+		return
+	}
+
+	httpresponse.Response(w, 200, taskInfo)
+}
+
 func (h *TaskHandler) FindUserTasks(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), h.cfg.CtxTimeOut)
 	defer cancel()

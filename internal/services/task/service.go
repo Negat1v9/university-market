@@ -20,6 +20,7 @@ import (
 var (
 	// minimum time that must pass after the last update to update the task
 	deltaOnUpdateTask time.Duration = time.Minute * 60
+	deltaOnRaiseTask  time.Duration = time.Hour * 24
 )
 
 type TaskServiceImpl struct {
@@ -141,6 +142,36 @@ func (s *TaskServiceImpl) UpdateTaskMeta(ctx context.Context, taskID, userID str
 	}
 
 	return afterTask, nil
+}
+
+// TEST
+func (s *TaskServiceImpl) RaiseTask(ctx context.Context, taskID string, userID string) (*taskmodel.InfoTaskRes, error) {
+	task, err := s.store.Task().FindProj(
+		ctx,
+		filters.New().Add(filters.TaskByID(taskID)).Add(filters.TaskByCreator(userID)).Filters(),
+		taskmodel.ProjOnRaiseTask)
+	switch {
+	case err == mongoStore.ErrNoTask:
+		return nil, httpresponse.NewError(404, err.Error())
+	case err != nil:
+		s.log.Debug("raise task", slog.String("err", err.Error()))
+		return nil, httpresponse.ServerError()
+	case task.Status == taskmodel.Deleted:
+		return nil, httpresponse.NewError(404, mongoStore.ErrNoTask.Error())
+	case task.Status != taskmodel.WaitingExecution:
+		return nil, httpresponse.NewError(406, "task.status is not "+string(taskmodel.WaitingExecution))
+	case !canRaiseTask(task.CreatedAt, deltaOnRaiseTask):
+		return nil, httpresponse.NewError(422, "task can't be raised")
+	}
+	updTask := &taskmodel.Task{
+		OnPromotion: true,
+		UpdatedAt:   time.Now().UTC(),
+	}
+	updTask, err = s.store.Task().Update(
+		ctx,
+		filters.New().Add(filters.TaskByID(taskID)).Filters(),
+		updTask)
+	return &taskmodel.InfoTaskRes{Task: updTask, QuantityFiles: len(updTask.FilesID)}, nil
 }
 
 // Info: FindUserTasks - find all user tasks support quary filters
