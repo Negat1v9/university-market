@@ -92,3 +92,8 @@ func createTags(t *taskmodel.TaskMeta) []string {
 func canUpdateTaskTime(updatedAt time.Time, delta time.Duration) bool {
 	return time.Now().UTC().Sub(updatedAt) >= delta
 }
+
+// checks the last create time true if it can be raised false if little time has passed
+func canRaiseTask(createdAt time.Time, delta time.Duration) bool {
+	return time.Now().UTC().Sub(createdAt) >= delta
+}

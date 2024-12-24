@@ -20,6 +20,7 @@ var (
 	}
 	ManyTasks = bson.M{
 		"_id":                 1,
+		"on_promotion":        1,
 		"status":              1,
 		"meta.max_days_work":  1,
 		"meta.min_price":      1,
@@ -33,6 +34,7 @@ var (
 	ProjManyTaskForUser = bson.M{
 		"_id":                 1,
 		"is_comment":          1,
+		"on_promotion":        1,
 		"status":              1,
 		"meta.max_days_work":  1,
 		"meta.min_price":      1,
@@ -68,5 +70,11 @@ var (
 		"status":     1,
 		"files_id":   1,
 		"files_send": 1,
+	}
+	ProjOnRaiseTask = bson.M{
+		"_id":          1,
+		"on_promotion": 1,
+		"status":       1,
+		"created_at":   1,
 	}
 )

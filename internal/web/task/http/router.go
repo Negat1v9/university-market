@@ -17,7 +17,7 @@ func RestTaskRouter(h *TaskHandler, mw *middleware.MiddleWareManager) http.Handl
 	priviteMux.HandleFunc("GET /find/{id}", h.FindOne)
 	priviteMux.HandleFunc("PUT /edit/meta/{id}", h.UpdateTaskMeta)
 	// priviteMux.HandleFunc("GET /info/{id}/worker/{worker_id}", h.TaskWithWorkerInfo)
-
+	priviteMux.HandleFunc("PUT /raise/{id}", h.RaiseTask)
 	priviteMux.HandleFunc("PUT /{id}/select/worker/{worker_id}", h.SelectWorker)
 
 	priviteMux.HandleFunc("PUT /complete/{id}", h.CompleteTask)
