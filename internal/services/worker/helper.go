@@ -21,3 +21,11 @@ func checkFilesAlredySend(workerID string, filesSendTo []string) error {
 	}
 	return nil
 }
+
+// if the value of maxNum is greater than or equal to the number of responds, it returns an error
+func checkCountRespondsOnTask(maxNum int, responds []string) error {
+	if len(responds) >= maxNum {
+		return fmt.Errorf("task already has too many responds: %d", len(responds))
+	}
+	return nil
+}

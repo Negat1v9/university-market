@@ -19,6 +19,11 @@ import (
 	"github.com/Negat1v9/work-marketplace/pkg/utils"
 )
 
+var (
+	// there should not be more than this number of responds on one task
+	maxCountResponds = 15
+)
+
 type WorkerServiceImpl struct {
 	botToken string
 	log      *slog.Logger
@@ -316,6 +321,10 @@ func (s *WorkerServiceImpl) RespondOnTask(ctx context.Context, workerID, taskID 
 
 	if checkWorkerAlredyRespond(workerID, task.Responds) {
 		return httpresponse.NewError(409, "have already responded")
+	}
+
+	if err := checkCountRespondsOnTask(maxCountResponds, task.Responds); err != nil {
+		return httpresponse.NewError(406, err.Error())
 	}
 
 	// receiving telegram user ID to send him a message
