@@ -11,4 +11,5 @@ type Store interface {
 	Respond() RespondRepository
 	Comment() CommentRepository
 	Report() ReportRepository
+	Event() EventRepository
 }

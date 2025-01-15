@@ -64,3 +64,9 @@ type ReportRepository interface {
 	Create(context.Context, *reportmodel.Report) (string, error)
 	FindOne(context.Context, bson.D) (*reportmodel.Report, error)
 }
+
+type EventRepository interface {
+	Create(ctx context.Context, event *eventmodel.Event) (string, error)
+	Update(ctx context.Context, filter bson.D, event *eventmodel.Event) (*eventmodel.Event, error)
+	FindOne(ctx context.Context, filter bson.D) (*eventmodel.Event, error)
+}

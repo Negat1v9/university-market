@@ -55,6 +55,20 @@ func (mr *MockStoreMockRecorder) Comment() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Comment", reflect.TypeOf((*MockStore)(nil).Comment))
 }
 
+// Event mocks base method.
+func (m *MockStore) Event() storage.EventRepository {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Event")
+	ret0, _ := ret[0].(storage.EventRepository)
+	return ret0
+}
+
+// Event indicates an expected call of Event.
+func (mr *MockStoreMockRecorder) Event() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Event", reflect.TypeOf((*MockStore)(nil).Event))
+}
+
 // Payment mocks base method.
 func (m *MockStore) Payment() storage.PaymentRepository {
 	m.ctrl.T.Helper()
