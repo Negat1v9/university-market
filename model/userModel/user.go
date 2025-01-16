@@ -23,8 +23,8 @@ type WorkerInfo struct {
 }
 
 type Balance struct {
-	NumberPayments int `bson:"number_payments" json:"-"`           //total number of balance top-ups
-	StarsBalance   int `bson:"stars_balance" json:"stars_balance"` // balance of telegram stars
+	NumberPayments int `bson:"number_payments" json:"number_payments"` //total number of balance top-ups
+	StarsBalance   int `bson:"stars_balance" json:"stars_balance"`     // balance of telegram stars
 }
 type NotificationSettings struct {
 	SendSilent bool `bson:"send_silent,omitempty" json:"send_silent,omitempty"`
