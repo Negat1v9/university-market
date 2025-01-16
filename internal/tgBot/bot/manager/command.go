@@ -80,7 +80,7 @@ func (m *Manager) isAdminCmd(userID int64) *tgbotapi.MessageConfig {
 	if !m.adminService.IsAdmin(userID) {
 		return nil
 	}
-	res := msgcrtr.CreateTextMsg(userID, "panel")
+	res := msgcrtr.CreateTextMsg(userID, static.AdminPanel)
 	res.ReplyMarkup = managerutils.CreateInlineAdminPanel()
 
 	return res
