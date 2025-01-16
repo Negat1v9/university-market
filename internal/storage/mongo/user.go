@@ -67,6 +67,36 @@ func (r *userRepository) FindProj(ctx context.Context, filter bson.D, proj bson.
 	}
 	return &user, nil
 }
+
+func (r *userRepository) FindManyProj(ctx context.Context, filter bson.D, proj bson.M, limit, skip int64) ([]usermodel.User, error) {
+	users := make([]usermodel.User, 0, limit)
+
+	cur, err := r.c.Find(
+		ctx,
+		filter,
+		options.Find().SetProjection(proj),
+		options.Find().SetLimit(limit),
+		options.Find().SetSkip(skip),
+	)
+	switch {
+	case err == mongo.ErrNoDocuments:
+		return nil, ErrNoUser
+	case err != nil:
+		return nil, err
+	}
+
+	err = cur.All(ctx, &users)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(users) == 0 {
+		return nil, ErrNoUser
+	}
+
+	return users, nil
+}
 func (r *userRepository) Edit(ctx context.Context, filter bson.D, user *usermodel.User) (*usermodel.User, error) {
 	userID := user.ID
 	if user.ID != "" {

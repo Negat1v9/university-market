@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/Negat1v9/work-marketplace/internal/config"
+	adminservice "github.com/Negat1v9/work-marketplace/internal/services/admin"
 	authservice "github.com/Negat1v9/work-marketplace/internal/services/auth"
 	commentservice "github.com/Negat1v9/work-marketplace/internal/services/comment"
 	paymentservice "github.com/Negat1v9/work-marketplace/internal/services/payment"
@@ -23,6 +24,7 @@ type Services struct {
 	WorkerService  workerservice.WorkerService
 	CommentService commentservice.CommentService
 	ReportService  reportservice.ReportService
+	AdmindService  adminservice.AdminService
 }
 
 func NewServiceBuilder(cfg *config.Config, log *slog.Logger, tgClient tgbot.WebTgClient, store storage.Store) *Services {
@@ -34,5 +36,6 @@ func NewServiceBuilder(cfg *config.Config, log *slog.Logger, tgClient tgbot.WebT
 		WorkerService:  workerservice.NewServiceWorker(log, tgClient, store, cfg.WebConfig.TgBotToken),
 		CommentService: commentservice.NewServiceComment(log, store),
 		ReportService:  reportservice.NewServiceReport(log, store),
+		AdmindService:  adminservice.NewServiceAdmin(log, store, tgClient, cfg.WebConfig.AdminsIDs),
 	}
 }

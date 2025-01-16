@@ -132,3 +132,12 @@ func ReportByTaskID(taskID string) bson.E {
 func ReportByReporterByRole(role usermodel.UserType) bson.E {
 	return bson.E{Key: "reported_by.role", Value: role}
 }
+
+// -------------------------------------------------
+//	Event FILTERS
+// -------------------------------------------------
+
+func EventByID(id string) bson.E {
+	eventID, _ := primitive.ObjectIDFromHex(id)
+	return bson.E{Key: "_id", Value: eventID}
+}
