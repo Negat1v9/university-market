@@ -7,7 +7,7 @@ type Event struct {
 	// event contains image
 	WithImage bool `bson:"with_image,omitempty" json:"with_image"`
 	// ID of the user who created the event
-	CreatorID string `bson:"creator_id,omitempty" json:"creator_id"`
+	CreatorID int64 `bson:"creator_id,omitempty" json:"creator_id"`
 	// for which message users: worker, all
 	UserType string `bson:"user_type,omitempty" json:"user_type"`
 	// caption of message
