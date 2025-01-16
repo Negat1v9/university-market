@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -85,6 +86,8 @@ type WebCfg struct {
 	JwtSecret []byte
 	// telegram bot token from botFather
 	TgBotToken string
+	// admin telegram IDs
+	AdminsIDs []int64
 }
 
 func newWebCfg() *WebCfg {
@@ -104,11 +107,17 @@ func newWebCfg() *WebCfg {
 	if tgToken == "" {
 		panic("no TG_BOT_TOKEN")
 	}
+	adminIDsString := os.Getenv("ADMINS_IDS")
+	if adminIDsString == "" {
+		panic("no ADMINS_IDS")
+	}
+
 	return &WebCfg{
 		CtxTimeOut: time.Second * time.Duration(stringToInt(ctxTimeOut)),
 		Port:       port,
 		JwtSecret:  []byte(jwtSecret),
 		TgBotToken: tgToken,
+		AdminsIDs:  stringToInt64Slice(adminIDsString),
 	}
 }
 
@@ -118,4 +127,17 @@ func stringToInt(s string) int {
 		panic("error convert: " + s + " to int type")
 	}
 	return num
+}
+
+func stringToInt64Slice(s string) []int64 {
+	slice := strings.Split(s, ",")
+	res := make([]int64, 0, len(slice))
+	for i := 0; i < len(slice); i++ {
+		num, err := strconv.ParseInt(slice[i], 10, 64)
+		if err != nil {
+			panic("stringToInt64Slice: convert string to int64 s=" + slice[i])
+		}
+		res = append(res, num)
+	}
+	return res
 }

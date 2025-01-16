@@ -4,8 +4,10 @@ type TgExpectedAction int16
 
 var (
 	// Waiting for files from the user for a task
-	WaitingForFiles    TgExpectedAction = 0
-	WorkerShareContact TgExpectedAction = 1
+	WaitingForFiles       TgExpectedAction = 0
+	WorkerShareContact    TgExpectedAction = 1
+	WaitingEventCaption   TgExpectedAction = 2
+	WaitingStartSendEvent TgExpectedAction = 3
 )
 
 type UserCommand struct {
@@ -22,4 +24,6 @@ type UserCommand struct {
 	// optional field for placing the user ID, for example, so that the worker shares his
 	// contact with him
 	UserID string `bson:"user_id,omitempty"`
+	// optional field the field stores the ID of the event to store and add its photo
+	EventID string `bson:"event_id,omitempty"`
 }

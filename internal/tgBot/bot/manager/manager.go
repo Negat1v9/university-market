@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Negat1v9/work-marketplace/internal/services"
+	adminservice "github.com/Negat1v9/work-marketplace/internal/services/admin"
 	paymentservice "github.com/Negat1v9/work-marketplace/internal/services/payment"
 	taskservice "github.com/Negat1v9/work-marketplace/internal/services/task"
 	userservice "github.com/Negat1v9/work-marketplace/internal/services/user"
@@ -26,6 +27,7 @@ type Manager struct {
 	paymentService paymentservice.PaymentService
 	taskService    taskservice.TaskService
 	userService    userservice.UserService
+	adminService   adminservice.AdminService
 	botClient      tgbot.TgBotClient
 	store          storage.Store
 }
@@ -38,6 +40,7 @@ func New(log *slog.Logger, bc tgbot.TgBotClient, webAppUrl string, services *ser
 		paymentService: services.PaymentService,
 		taskService:    services.TaskService,
 		userService:    services.UserService,
+		adminService:   services.AdmindService,
 		botClient:      bc,
 		store:          store,
 	}

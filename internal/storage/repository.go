@@ -4,6 +4,7 @@ import (
 	"context"
 
 	commentmodel "github.com/Negat1v9/work-marketplace/model/comment"
+	eventmodel "github.com/Negat1v9/work-marketplace/model/event"
 	paymentmodel "github.com/Negat1v9/work-marketplace/model/payment"
 	reportmodel "github.com/Negat1v9/work-marketplace/model/report"
 	respondmodel "github.com/Negat1v9/work-marketplace/model/respond"
@@ -17,6 +18,7 @@ type UserRepository interface {
 	Create(context.Context, *usermodel.User) (string, error)
 	Find(context.Context, bson.D) (*usermodel.User, error)
 	FindProj(ctx context.Context, filter bson.D, proj bson.M) (*usermodel.User, error)
+	FindManyProj(ctx context.Context, filter bson.D, proj bson.M, limit, skip int64) ([]usermodel.User, error)
 	Edit(ctx context.Context, filter bson.D, upd *usermodel.User) (*usermodel.User, error)
 }
 
@@ -63,4 +65,10 @@ type CommentRepository interface {
 type ReportRepository interface {
 	Create(context.Context, *reportmodel.Report) (string, error)
 	FindOne(context.Context, bson.D) (*reportmodel.Report, error)
+}
+
+type EventRepository interface {
+	Create(ctx context.Context, event *eventmodel.Event) (string, error)
+	Update(ctx context.Context, filter bson.D, event *eventmodel.Event) (*eventmodel.Event, error)
+	FindOne(ctx context.Context, filter bson.D) (*eventmodel.Event, error)
 }

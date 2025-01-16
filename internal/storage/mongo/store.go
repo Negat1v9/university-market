@@ -16,6 +16,7 @@ const (
 	tgCmdCollection   = "tg_command"
 	commentCollection = "comment"
 	reportCollection  = "report"
+	eventCollection   = "event"
 )
 
 type Store struct {
@@ -27,6 +28,7 @@ type Store struct {
 	*respondRepository
 	*commentRepository
 	*reportRepository
+	*eventRepository
 }
 
 func New(db *mongo.Database) *Store {
@@ -152,4 +154,12 @@ func (s *Store) Report() storage.ReportRepository {
 	}
 	s.reportRepository = newReportRepo(s.db.Collection(reportCollection))
 	return s.reportRepository
+}
+
+func (s *Store) Event() storage.EventRepository {
+	if s.eventRepository != nil {
+		return s.eventRepository
+	}
+	s.eventRepository = newEventRepo(s.db.Collection(eventCollection))
+	return s.eventRepository
 }

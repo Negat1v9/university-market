@@ -6,6 +6,7 @@ import (
 	managerutils "github.com/Negat1v9/work-marketplace/internal/tgBot/bot/manager/utils"
 	msgcrtr "github.com/Negat1v9/work-marketplace/internal/tgBot/bot/manager/utils/msgcreater"
 	"github.com/Negat1v9/work-marketplace/internal/tgBot/bot/manager/utils/static"
+	eventmodel "github.com/Negat1v9/work-marketplace/model/event"
 	taskmodel "github.com/Negat1v9/work-marketplace/model/taskModel"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -50,4 +51,17 @@ func (c *Client) SendFiles(ctx context.Context, tgWorkerID int64, files []string
 	msg := tgbotapi.NewMediaGroup(tgWorkerID, groupFiles)
 
 	return c.SendGroupMedia(msg)
+}
+
+func (c *Client) SendEventMsg(userTgID int64, event *eventmodel.Event) error {
+	var msg tgbotapi.Chattable
+
+	switch {
+	case event.WithImage:
+		msg = msgcrtr.CreatePhotoMsg(userTgID, event.FileID, event.Caption)
+	case !event.WithImage:
+		msg = msgcrtr.CreateTextMsg(userTgID, event.Caption)
+	}
+
+	return c.Send(msg)
 }
