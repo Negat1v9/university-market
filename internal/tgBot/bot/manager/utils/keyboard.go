@@ -9,6 +9,8 @@ import (
 const (
 	PostTaskCallBack     = "1"
 	ShareContactCallBack = "2"
+	StartSendingMessages = "3"
+	CreateEventCallBack  = "4"
 )
 
 func CreateInlineOnAddFiles() *tgbotapi.InlineKeyboardMarkup {
@@ -61,6 +63,24 @@ func CreateInlineAfterShareContact(baseUrl, taskID string) *tgbotapi.InlineKeybo
 			tgbotapi.NewInlineKeyboardButtonWebApp("Работа", tgbotapi.WebAppInfo{
 				URL: fmt.Sprintf("%s/worker/task?taskID=%s", baseUrl, taskID),
 			}),
+		),
+	)
+	return &kb
+}
+
+func CreateInlineAdminPanel() *tgbotapi.InlineKeyboardMarkup {
+	kb := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Создать эвент", CreateEventCallBack),
+		),
+	)
+	return &kb
+}
+
+func CreateInlineStartMailingList() *tgbotapi.InlineKeyboardMarkup {
+	kb := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Начать рассылку", StartSendingMessages),
 		),
 	)
 	return &kb

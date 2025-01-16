@@ -20,22 +20,18 @@ func (m *Manager) manageCallBack(ctx context.Context, cb *tgbotapi.CallbackQuery
 	m.cache.Add(cb.From.ID)
 	defer m.cache.Delete(cb.From.ID)
 
-	cmd, err := m.store.TgCmd().Find(ctx, cb.From.ID)
 	var response tgbotapi.Chattable
-	switch {
-	case err == mongoStore.ErrNoTgCmd:
-		m.botClient.Send(msgcrtr.CreateTextMsg(cb.From.ID, static.NoTgCmdFinded))
-		return
-	case err != nil:
-		m.botClient.Send(msgcrtr.CreateTextMsg(cb.From.ID, static.ErrBot))
-		return
-	}
+	var err error
 
 	switch {
-	case managerutils.PostTaskCallBack == cb.Data && cmd.ExpectedAction == tgbotmodel.WaitingForFiles:
-		response, err = m.publichTask(ctx, cmd.TaskID, cb)
-	case managerutils.ShareContactCallBack == cb.Data && cmd.ExpectedAction == tgbotmodel.WorkerShareContact:
-		response, err = m.shareContact(ctx, cmd, cb)
+	case managerutils.PostTaskCallBack == cb.Data:
+		response, err = m.publichTask(ctx, cb)
+	case managerutils.ShareContactCallBack == cb.Data:
+		response, err = m.shareContact(ctx, cb)
+	case managerutils.CreateEventCallBack == cb.Data:
+		response, err = m.onCreateEvent(ctx, cb)
+	case managerutils.StartSendingMessages == cb.Data:
+		response, err = m.startSendingMessages(ctx, cb)
 	}
 
 	if err != nil {
@@ -47,17 +43,33 @@ func (m *Manager) manageCallBack(ctx context.Context, cb *tgbotapi.CallbackQuery
 
 }
 
-func (m *Manager) publichTask(ctx context.Context, taskID string, cb *tgbotapi.CallbackQuery) (*tgbotapi.MessageConfig, error) {
-	err := m.taskService.PublishTask(ctx, taskID)
+func (m *Manager) publichTask(ctx context.Context, cb *tgbotapi.CallbackQuery) (*tgbotapi.MessageConfig, error) {
+	cmd, err := m.store.TgCmd().Find(ctx, cb.From.ID)
+	switch {
+	case err == mongoStore.ErrNoTgCmd:
+		return msgcrtr.CreateTextMsg(cb.From.ID, static.NoTgCmdFinded), nil
+	case err != nil:
+		return msgcrtr.CreateTextMsg(cb.From.ID, static.ErrBot), nil
+	}
+
+	err = m.taskService.PublishTask(ctx, cmd.TaskID)
 	if err != nil {
 		return nil, err
 	}
 	res := msgcrtr.CreateTextMsg(cb.From.ID, static.SuccessPublichTask)
-	res.ReplyMarkup = managerutils.CreateInlineOnPublichTask(m.webAppBaseUrl, taskID)
+	res.ReplyMarkup = managerutils.CreateInlineOnPublichTask(m.webAppBaseUrl, cmd.TaskID)
 	return res, nil
 }
 
-func (m *Manager) shareContact(ctx context.Context, cmd *tgbotmodel.UserCommand, cb *tgbotapi.CallbackQuery) (tgbotapi.Chattable, error) {
+func (m *Manager) shareContact(ctx context.Context, cb *tgbotapi.CallbackQuery) (tgbotapi.Chattable, error) {
+	cmd, err := m.store.TgCmd().Find(ctx, cb.From.ID)
+	switch {
+	case err == mongoStore.ErrNoTgCmd:
+		return msgcrtr.CreateTextMsg(cb.From.ID, static.NoTgCmdFinded), nil
+	case err != nil:
+		return msgcrtr.CreateTextMsg(cb.From.ID, static.ErrBot), nil
+	}
+
 	if cb.From.UserName == "" {
 		return msgcrtr.CreateTextMsg(cb.From.ID, static.ErrNoUserName), nil
 	}
@@ -74,4 +86,41 @@ func (m *Manager) shareContact(ctx context.Context, cmd *tgbotmodel.UserCommand,
 	markup := managerutils.CreateInlineAfterShareContact(m.webAppBaseUrl, cmd.TaskID)
 
 	return tgbotapi.NewEditMessageReplyMarkup(cb.From.ID, cb.Message.MessageID, *markup), nil
+}
+
+func (m *Manager) onCreateEvent(ctx context.Context, cb *tgbotapi.CallbackQuery) (tgbotapi.Chattable, error) {
+	err := m.store.TgCmd().Delete(ctx, cb.From.ID)
+	if err != nil && err != mongoStore.ErrNoTgCmd {
+		m.log.Error("Manager.onCreateEvent.TgCmd.Delete", slog.String("err", err.Error()))
+		return nil, err
+	}
+	tgCmd := &tgbotmodel.UserCommand{
+		ID:             cb.From.ID,
+		ExpectedAction: tgbotmodel.WaitingEventCaption,
+	}
+
+	err = m.store.TgCmd().Create(ctx, tgCmd)
+	if err != nil && err != mongoStore.ErrNoTgCmd {
+		m.log.Error("Manager.onCreateEvent.TgCmd.Create", slog.String("err", err.Error()))
+		return nil, err
+	}
+	msg := msgcrtr.CreateTextMsg(cb.From.ID, static.CreateEvent)
+
+	return msg, nil
+}
+
+func (m *Manager) startSendingMessages(ctx context.Context, cb *tgbotapi.CallbackQuery) (tgbotapi.Chattable, error) {
+	cmd, err := m.store.TgCmd().Find(ctx, cb.From.ID)
+	switch {
+	case err == mongoStore.ErrNoTgCmd:
+		return msgcrtr.CreateTextMsg(cb.From.ID, static.NoTgCmdFinded), nil
+	case err != nil:
+		return msgcrtr.CreateTextMsg(cb.From.ID, static.ErrBot), nil
+	}
+
+	if err = m.adminService.StartSendingEvent(ctx, cmd.EventID); err != nil {
+		return nil, err
+	}
+
+	return msgcrtr.CreateTextMsg(cb.From.ID, static.OnStartSendEvent), nil
 }

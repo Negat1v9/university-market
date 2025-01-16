@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"strings"
 
+	managerutils "github.com/Negat1v9/work-marketplace/internal/tgBot/bot/manager/utils"
 	msgcrtr "github.com/Negat1v9/work-marketplace/internal/tgBot/bot/manager/utils/msgcreater"
 	"github.com/Negat1v9/work-marketplace/internal/tgBot/bot/manager/utils/static"
 	usermodel "github.com/Negat1v9/work-marketplace/model/userModel"
@@ -15,6 +16,7 @@ import (
 var (
 	startCmd = "/start"
 	helpCmd  = "/help"
+	adminCmd = "/admin"
 )
 
 // returns true if the text is a command (starts with /)
@@ -34,6 +36,8 @@ func (m *Manager) manageCommand(ctx context.Context, msg *tgbotapi.Message) {
 		res, err = m.isStartCmd(ctx, msg)
 	case msg.Text == helpCmd:
 		res = m.isHelpCmd(msg.From.ID)
+	case msg.Text == adminCmd:
+		res = m.isAdminCmd(msg.From.ID)
 	// do nothing on unknown cmd
 	default:
 		return
@@ -41,6 +45,10 @@ func (m *Manager) manageCommand(ctx context.Context, msg *tgbotapi.Message) {
 
 	if err != nil {
 		res = msgcrtr.CreateTextMsg(msg.From.ID, static.ErrBot)
+	}
+	// skipping messages for not to load the server
+	if res == nil {
+		return
 	}
 	if err = m.botClient.Send(res); err != nil {
 		m.log.Error("bot send cmd", slog.String("err", err.Error()))
@@ -68,6 +76,15 @@ func (m *Manager) isHelpCmd(userID int64) *tgbotapi.MessageConfig {
 	return msgcrtr.CreateTextMsg(userID, static.HelpCmd)
 }
 
+func (m *Manager) isAdminCmd(userID int64) *tgbotapi.MessageConfig {
+	if !m.adminService.IsAdmin(userID) {
+		return nil
+	}
+	res := msgcrtr.CreateTextMsg(userID, "panel")
+	res.ReplyMarkup = managerutils.CreateInlineAdminPanel()
+
+	return res
+}
 func referallIDFromStartCmd(s string) int64 {
 	startParam := strings.TrimPrefix(s, startCmd+" ")
 	referralID, err := utils.ConvertStringToInt64(startParam)
