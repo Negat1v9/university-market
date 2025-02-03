@@ -66,30 +66,29 @@ func (s *AdminServiceImpl) StartSendingEvent(ctx context.Context, eventID string
 }
 
 func (s *AdminServiceImpl) startSendingEvent(event *eventmodel.Event) {
-	var limit int64 = 20
+	var limit int64 = 1
 	var skip int64 = 0
 	totalSendMessages := 0
 	totalErrorCount := 0
 	for {
 		users, err := s.getUsersForSednigEvent(limit, skip)
 		switch {
-		case totalErrorCount >= 10:
+		case totalErrorCount >= 5:
 			s.log.Error("AdminService.startSendingEvent", slog.Int("total error count", totalErrorCount))
+			return
 		// exit loop if there are no more users
 		case err == mongoStore.ErrNoUser:
-			totalErrorCount++
 			s.log.Debug("exit from sending event messages")
 			return
 		case err != nil:
 			totalErrorCount++
-			skip += limit
 			s.log.Error("AdminService.startSendingEvent.getUsersForSednigEvent", slog.String("err", err.Error()))
+			time.Sleep(time.Second * 60)
 		default:
-			skip += limit
+			skip += int64(len(users))
 			for i := 0; i < len(users); i++ {
 				err = s.tgClient.SendEventMsg(users[i].TelegramID, event)
 				if err != nil {
-					totalErrorCount++
 					s.log.Error("AdminService.startSendingEvent send msg to "+users[i].ID, slog.String("err", err.Error()))
 				} else {
 					totalSendMessages += 1
