@@ -58,9 +58,13 @@ func (c *Client) SendEventMsg(userTgID int64, event *eventmodel.Event) error {
 
 	switch {
 	case event.WithImage:
-		msg = msgcrtr.CreatePhotoMsg(userTgID, event.FileID, event.Caption)
+		photoMsg := msgcrtr.CreatePhotoMsg(userTgID, event.FileID, event.Caption)
+		photoMsg.DisableNotification = true
+		msg = photoMsg
 	case !event.WithImage:
-		msg = msgcrtr.CreateTextMsg(userTgID, event.Caption)
+		textMsg := msgcrtr.CreateTextMsg(userTgID, event.Caption)
+		textMsg.DisableNotification = true
+		msg = textMsg
 	}
 
 	return c.Send(msg)
